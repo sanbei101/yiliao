@@ -1,9 +1,10 @@
 {
-    "oxc.fmt.configPath": "oxfmt.config.ts",
+  "recommendations": ["oxc.oxc-vscode", "Vue.volar"],
+  "oxc.fmt.configPath": "oxfmt.config.ts",
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "editor.formatOnSave": true,
+  "[vue]": {
     "editor.defaultFormatter": "oxc.oxc-vscode",
-    "editor.formatOnSave": true,
-    "[vue]": {
-        "editor.defaultFormatter": "oxc.oxc-vscode",
-        "editor.formatOnSave": true
-    }
+    "editor.formatOnSave": true
+  }
 }
