@@ -1,8 +1,14 @@
 <script setup lang="ts">
 import { RouterLink, RouterView, useRouter } from "vue-router";
-import { Activity, Calendar, Home, ListVideo } from "lucide-vue-next";
+import { Activity, Calendar, Home, ListVideo, Moon, Sun } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
-
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useColorMode } from "@vueuse/core";
 const navItems = [
   { name: "首页", path: "/", icon: Home },
   { name: "训练分类", path: "/training-category", icon: ListVideo },
@@ -13,6 +19,7 @@ const router = useRouter();
 function goToHome() {
   router.push("/");
 }
+const mode = useColorMode();
 </script>
 
 <template>
@@ -24,6 +31,20 @@ function goToHome() {
         <div class="flex items-center gap-2">
           <Activity class="h-6 w-6 text-primary" />
           <span class="cursor-pointer font-semibold" @click="goToHome">康复训练</span>
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <Button variant="outline">
+                <Sun class="size-5 dark:hidden" />
+                <Moon class="hidden size-5 dark:block" />
+                <span class="sr-only">Toggle theme</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="center">
+              <DropdownMenuItem @click="mode = 'light'"> 亮色 </DropdownMenuItem>
+              <DropdownMenuItem @click="mode = 'dark'"> 暗色 </DropdownMenuItem>
+              <DropdownMenuItem @click="mode = 'auto'"> 系统 </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         <nav class="flex items-center gap-1">
           <Button v-for="item in navItems" :key="item.path" variant="default" size="sm" as-child>
