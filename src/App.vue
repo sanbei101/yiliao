@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from "vue-router";
+import { RouterLink, RouterView, useRouter } from "vue-router";
 import { Activity, Calendar, Home, ListVideo } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
 
@@ -9,6 +9,10 @@ const navItems = [
   { name: "今日计划", path: "/today-plan", icon: Calendar },
   { name: "训练记录", path: "/training-record", icon: Activity },
 ];
+const router = useRouter();
+function goToHome() {
+  router.push("/");
+}
 </script>
 
 <template>
@@ -19,7 +23,7 @@ const navItems = [
       <div class="mx-auto flex h-14 w-full max-w-7xl items-center justify-between px-4">
         <div class="flex items-center gap-2">
           <Activity class="h-6 w-6 text-primary" />
-          <span class="font-semibold">康复训练</span>
+          <span class="cursor-pointer font-semibold" @click="goToHome">康复训练</span>
         </div>
         <nav class="flex items-center gap-1">
           <Button v-for="item in navItems" :key="item.path" variant="default" size="sm" as-child>
