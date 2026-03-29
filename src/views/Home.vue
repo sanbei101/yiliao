@@ -1,26 +1,30 @@
 <script setup lang="ts">
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { Activity, ArrowRight, Calendar, ChevronRight, Clock, Play } from "lucide-vue-next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { api } from "@/services/api";
 
 const router = useRouter();
+const loading = ref(true);
+const isLoggedIn = ref(!!api.getToken());
 
-const todayTraining = {
+const todayTraining = ref({
   title: "肩颈放松训练",
   duration: "10分钟",
   progress: 60,
-};
+});
 
-const recentRecords = [
+const recentRecords = ref([
   { date: "今天", title: "手臂拉伸训练", duration: "8分钟", completed: true },
   { date: "昨天", title: "腿部力量训练", duration: "15分钟", completed: true },
   { date: "3月24日", title: "关节舒缓训练", duration: "10分钟", completed: true },
-];
+]);
 
-const categories = [
+const categories = ref([
   { name: "手臂训练", count: 12 },
   { name: "腿脚训练", count: 15 },
   { name: "关节舒缓", count: 8 },
@@ -28,7 +32,49 @@ const categories = [
   { name: "站着练", count: 10 },
   { name: "5分钟训练", count: 20 },
   { name: "10分钟训练", count: 18 },
-];
+]);
+
+async function loadData() {
+  loading.value = true;
+  try {
+    const categoriesRes = await api.getTrainingCategories();
+    
+    if (categoriesRes.success && categoriesRes.data) {
+      categories.value = categoriesRes.data;
+    }
+
+    const isLoggedIn = !!api.getToken();
+    if (isLoggedIn) {
+      const [recordsRes, todayPlanRes] = await Promise.all([
+        api.getTrainingRecords(7),
+        api.getTodayPlan()
+      ]);
+
+      if (recordsRes.success && recordsRes.data) {
+        recentRecords.value = recordsRes.data.slice(0, 3);
+      }
+
+      if (todayPlanRes.success && todayPlanRes.data) {
+        const plan = todayPlanRes.data;
+        if (plan.trainingList.length > 0) {
+          todayTraining.value = {
+            title: plan.trainingList[0].title,
+            duration: plan.trainingList[0].duration,
+            progress: plan.progress,
+          };
+        }
+      }
+    }
+  } catch (error) {
+    console.error("加载数据失败:", error);
+  } finally {
+    loading.value = false;
+  }
+}
+
+onMounted(() => {
+  loadData();
+});
 
 function startTraining() {
   router.push("/training-category");

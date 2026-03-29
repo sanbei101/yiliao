@@ -1,13 +1,16 @@
 <script setup lang="ts">
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { ArrowLeft, ChevronRight, Clock, Filter } from "lucide-vue-next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { api } from "@/services/api";
 
 const router = useRouter();
+const loading = ref(true);
 
-const categories = [
+const categories = ref([
   { id: "arm", name: "手臂训练", description: "针对上肢力量和柔韧性的训练", count: 12 },
   { id: "leg", name: "腿脚训练", description: "针对下肢力量和平衡的训练", count: 15 },
   { id: "joint", name: "关节舒缓", description: "关节活动度和舒缓放松训练", count: 8 },
@@ -15,9 +18,9 @@ const categories = [
   { id: "stand", name: "站着练", description: "站立姿势的训练动作", count: 10 },
   { id: "5min", name: "5分钟训练", description: "快速完成的短时训练", count: 20 },
   { id: "10min", name: "10分钟训练", description: "中等时长的训练计划", count: 18 },
-];
+]);
 
-const trainings = [
+const trainings = ref([
   {
     id: "1",
     title: "肩颈活动训练",
@@ -66,9 +69,47 @@ const trainings = [
     difficulty: "进阶",
     description: "提升站立平衡能力,降低跌倒风险。",
   },
-];
+]);
 
-const selectedCategory = "all";
+const selectedCategory = ref<number | null>(null);
+
+async function loadData() {
+  loading.value = true;
+  try {
+    const [categoriesRes, videosRes] = await Promise.all([
+      api.getTrainingCategories(),
+      api.getTrainingVideos()
+    ]);
+
+    if (categoriesRes.success && categoriesRes.data) {
+      categories.value = categoriesRes.data.map(cat => ({
+        id: cat.id.toString(),
+        name: cat.name,
+        description: "",
+        count: cat.count
+      }));
+    }
+
+    if (videosRes.success && videosRes.data) {
+      trainings.value = videosRes.data.map(video => ({
+        id: video.id.toString(),
+        title: video.title,
+        category: video.categories?.[0]?.name || "未分类",
+        duration: video.duration,
+        difficulty: "入门",
+        description: video.description || ""
+      }));
+    }
+  } catch (error) {
+    console.error("加载数据失败:", error);
+  } finally {
+    loading.value = false;
+  }
+}
+
+onMounted(() => {
+  loadData();
+});
 
 function goBack() {
   router.back();
@@ -79,7 +120,29 @@ function goToTraining(id: string) {
 }
 
 function selectCategory(id: string) {
-  console.log("selectCategory", id);
+  selectedCategory.value = parseInt(id);
+  loadVideos(parseInt(id));
+}
+
+async function loadVideos(categoryId?: number) {
+  loading.value = true;
+  try {
+    const response = await api.getTrainingVideos(categoryId);
+    if (response.success && response.data) {
+      trainings.value = response.data.map(video => ({
+        id: video.id.toString(),
+        title: video.title,
+        category: video.categories?.[0]?.name || "未分类",
+        duration: video.duration,
+        difficulty: "入门",
+        description: video.description || ""
+      }));
+    }
+  } catch (error) {
+    console.error("加载视频失败:", error);
+  } finally {
+    loading.value = false;
+  }
 }
 </script>
 
