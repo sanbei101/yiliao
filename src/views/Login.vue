@@ -30,7 +30,7 @@ async function handleSubmit() {
       const response = await api.login(formData.value.account, formData.value.password);
       if (response.success && response.data) {
         api.setToken(response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+        localStorage.setItem("user", JSON.stringify(response.data.user));
         router.push("/");
       } else {
         error.value = response.error || "登录失败";
@@ -40,7 +40,7 @@ async function handleSubmit() {
         formData.value.account,
         formData.value.password,
         formData.value.user_name,
-        formData.value.role
+        formData.value.role,
       );
       if (response.success) {
         isLogin.value = true;
@@ -86,18 +86,13 @@ function skipLogin() {
         </CardDescription>
       </CardHeader>
       <CardContent class="space-y-4">
-        <div v-if="error" class="rounded-lg bg-destructive/10 p-3 text-destructive text-sm">
+        <div v-if="error" class="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
           {{ error }}
         </div>
 
         <div class="space-y-2">
           <Label for="account">账号</Label>
-          <Input
-            id="account"
-            v-model="formData.account"
-            placeholder="请输入账号"
-            required
-          />
+          <Input id="account" v-model="formData.account" placeholder="请输入账号" required />
         </div>
 
         <div class="space-y-2">
@@ -113,7 +108,7 @@ function skipLogin() {
             <Button
               variant="ghost"
               size="icon"
-              class="absolute right-0 top-0 h-full px-3 text-muted-foreground"
+              class="absolute top-0 right-0 h-full px-3 text-muted-foreground"
               @click="showPassword = !showPassword"
             >
               <Eye v-if="showPassword" class="h-4 w-4" />
@@ -124,12 +119,7 @@ function skipLogin() {
 
         <div v-if="!isLogin" class="space-y-2">
           <Label for="user_name">姓名</Label>
-          <Input
-            id="user_name"
-            v-model="formData.user_name"
-            placeholder="请输入姓名"
-            required
-          />
+          <Input id="user_name" v-model="formData.user_name" placeholder="请输入姓名" required />
         </div>
 
         <div v-if="!isLogin" class="space-y-2">
@@ -152,29 +142,17 @@ function skipLogin() {
           </div>
         </div>
 
-        <Button
-          class="w-full"
-          :disabled="loading"
-          @click="handleSubmit"
-        >
+        <Button class="w-full" :disabled="loading" @click="handleSubmit">
           <LogIn v-if="isLogin" class="mr-2 h-4 w-4" />
           <UserPlus v-else class="mr-2 h-4 w-4" />
           {{ isLogin ? "登录" : "注册" }}
         </Button>
 
-        <Button
-          variant="ghost"
-          class="w-full"
-          @click="toggleMode"
-        >
+        <Button variant="ghost" class="w-full" @click="toggleMode">
           {{ isLogin ? "没有账号？立即注册" : "已有账号？立即登录" }}
         </Button>
-        
-        <Button
-          variant="outline"
-          class="w-full mt-2"
-          @click="skipLogin"
-        >
+
+        <Button variant="outline" class="mt-2 w-full" @click="skipLogin">
           跳过登录，继续浏览
         </Button>
       </CardContent>

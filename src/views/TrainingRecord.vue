@@ -16,7 +16,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { api } from "@/services/api";
 
 const router = useRouter();
@@ -29,7 +34,7 @@ const stats = ref({
   currentStreak: 0,
   completionRate: 0,
   targetMinutes: 33, // 每日目标训练时长（分钟）
-  todayDurationPercentage: [] as { title: string; duration: number; percentage: number }[]
+  todayDurationPercentage: [] as { title: string; duration: number; percentage: number }[],
 });
 
 // 时间范围选择
@@ -62,31 +67,89 @@ const records = ref<DayRecord[]>([
     date: "2026年3月26日",
     dayOfWeek: "周四",
     trainings: [
-      { title: "肩颈活动训练", duration: "10分钟", completed: true, targetDuration: 10, actualDuration: 10, completionRate: 100 },
-      { title: "手臂拉伸训练", duration: "8分钟", completed: true, targetDuration: 8, actualDuration: 8, completionRate: 100 },
+      {
+        title: "肩颈活动训练",
+        duration: "10分钟",
+        completed: true,
+        targetDuration: 10,
+        actualDuration: 10,
+        completionRate: 100,
+      },
+      {
+        title: "手臂拉伸训练",
+        duration: "8分钟",
+        completed: true,
+        targetDuration: 8,
+        actualDuration: 8,
+        completionRate: 100,
+      },
     ],
   },
   {
     date: "2026年3月25日",
     dayOfWeek: "周三",
     trainings: [
-      { title: "腿部力量训练", duration: "15分钟", completed: true, targetDuration: 15, actualDuration: 15, completionRate: 100 },
-      { title: "全身放松训练", duration: "5分钟", completed: false, targetDuration: 5, actualDuration: 0, completionRate: 0 },
+      {
+        title: "腿部力量训练",
+        duration: "15分钟",
+        completed: true,
+        targetDuration: 15,
+        actualDuration: 15,
+        completionRate: 100,
+      },
+      {
+        title: "全身放松训练",
+        duration: "5分钟",
+        completed: false,
+        targetDuration: 5,
+        actualDuration: 0,
+        completionRate: 0,
+      },
     ],
   },
   {
     date: "2026年3月24日",
     dayOfWeek: "周二",
     trainings: [
-      { title: "肩颈活动训练", duration: "10分钟", completed: true, targetDuration: 10, actualDuration: 10, completionRate: 100 },
-      { title: "手臂拉伸训练", duration: "8分钟", completed: true, targetDuration: 8, actualDuration: 8, completionRate: 100 },
-      { title: "腿部力量训练", duration: "15分钟", completed: true, targetDuration: 15, actualDuration: 15, completionRate: 100 },
+      {
+        title: "肩颈活动训练",
+        duration: "10分钟",
+        completed: true,
+        targetDuration: 10,
+        actualDuration: 10,
+        completionRate: 100,
+      },
+      {
+        title: "手臂拉伸训练",
+        duration: "8分钟",
+        completed: true,
+        targetDuration: 8,
+        actualDuration: 8,
+        completionRate: 100,
+      },
+      {
+        title: "腿部力量训练",
+        duration: "15分钟",
+        completed: true,
+        targetDuration: 15,
+        actualDuration: 15,
+        completionRate: 100,
+      },
     ],
   },
   {
     date: "2026年3月23日",
     dayOfWeek: "周一",
-    trainings: [{ title: "关节舒缓训练", duration: "12分钟", completed: true, targetDuration: 12, actualDuration: 12, completionRate: 100 }],
+    trainings: [
+      {
+        title: "关节舒缓训练",
+        duration: "12分钟",
+        completed: true,
+        targetDuration: 12,
+        actualDuration: 12,
+        completionRate: 100,
+      },
+    ],
   },
   {
     date: "2026年3月22日",
@@ -97,8 +160,22 @@ const records = ref<DayRecord[]>([
     date: "2026年3月21日",
     dayOfWeek: "周六",
     trainings: [
-      { title: "坐姿核心训练", duration: "10分钟", completed: true, targetDuration: 10, actualDuration: 10, completionRate: 100 },
-      { title: "站立平衡训练", duration: "8分钟", completed: true, targetDuration: 8, actualDuration: 8, completionRate: 100 },
+      {
+        title: "坐姿核心训练",
+        duration: "10分钟",
+        completed: true,
+        targetDuration: 10,
+        actualDuration: 10,
+        completionRate: 100,
+      },
+      {
+        title: "站立平衡训练",
+        duration: "8分钟",
+        completed: true,
+        targetDuration: 8,
+        actualDuration: 8,
+        completionRate: 100,
+      },
     ],
   },
 ]);
@@ -123,18 +200,31 @@ async function loadTrainingRecords() {
     const response = await api.getTrainingRecords(days);
     if (response.success && response.data) {
       // 直接使用后端返回的数据结构
-      records.value = (response.data.records || []).map((record: { date: string; dayOfWeek: string; trainings: { title: string; duration: string; completed: boolean; targetDuration?: number; actualDuration?: number; completionRate?: number }[] }) => ({
-        date: record.date,
-        dayOfWeek: record.dayOfWeek,
-        trainings: record.trainings.map(t => ({
-          title: t.title,
-          duration: t.duration,
-          completed: t.completed,
-          targetDuration: t.targetDuration || 0,
-          actualDuration: t.actualDuration || 0,
-          completionRate: t.completionRate || 0
-        }))
-      }));
+      records.value = (response.data.records || []).map(
+        (record: {
+          date: string;
+          dayOfWeek: string;
+          trainings: {
+            title: string;
+            duration: string;
+            completed: boolean;
+            targetDuration?: number;
+            actualDuration?: number;
+            completionRate?: number;
+          }[];
+        }) => ({
+          date: record.date,
+          dayOfWeek: record.dayOfWeek,
+          trainings: record.trainings.map((t) => ({
+            title: t.title,
+            duration: t.duration,
+            completed: t.completed,
+            targetDuration: t.targetDuration || 0,
+            actualDuration: t.actualDuration || 0,
+            completionRate: t.completionRate || 0,
+          })),
+        }),
+      );
 
       // 更新统计数据
       if (response.data.stats) {
@@ -144,7 +234,7 @@ async function loadTrainingRecords() {
           currentStreak: stats.value.currentStreak,
           completionRate: response.data.stats.todayCompletionRate || 0,
           targetMinutes: response.data.stats.targetMinutesPerDay || 33,
-          todayDurationPercentage: response.data.stats.todayDurationPercentage || []
+          todayDurationPercentage: response.data.stats.todayDurationPercentage || [],
         };
       } else {
         calculateStats(records.value);
@@ -187,7 +277,7 @@ function calculateStats(groupedRecords: DayRecord[]) {
         todayTrainingDetails.push({
           title: training.title,
           duration: training.actualDuration,
-          targetDuration: training.targetDuration
+          targetDuration: training.targetDuration,
         });
       }
     });
@@ -197,15 +287,19 @@ function calculateStats(groupedRecords: DayRecord[]) {
   const currentStreak = calculateCurrentStreak(groupedRecords);
 
   // 计算完成率：今日实际训练时长 / 今日目标训练时长（固定33分钟）
-  const completionRate = stats.value.targetMinutes > 0 ? Math.round((todayActualMinutes / stats.value.targetMinutes) * 100) : 0;
+  const completionRate =
+    stats.value.targetMinutes > 0
+      ? Math.round((todayActualMinutes / stats.value.targetMinutes) * 100)
+      : 0;
 
   // 计算今日各训练项目的时长占比
-  const todayDurationPercentage = todayTrainingDetails.map(training => {
-    const percentage = todayActualMinutes > 0 ? Math.round((training.duration / todayActualMinutes) * 100) : 0;
+  const todayDurationPercentage = todayTrainingDetails.map((training) => {
+    const percentage =
+      todayActualMinutes > 0 ? Math.round((training.duration / todayActualMinutes) * 100) : 0;
     return {
       title: training.title,
       duration: training.duration,
-      percentage: percentage
+      percentage: percentage,
     };
   });
 
@@ -215,7 +309,7 @@ function calculateStats(groupedRecords: DayRecord[]) {
     currentStreak: currentStreak,
     completionRate: completionRate,
     targetMinutes: stats.value.targetMinutes,
-    todayDurationPercentage: todayDurationPercentage
+    todayDurationPercentage: todayDurationPercentage,
   };
 }
 
@@ -237,8 +331,8 @@ function calculateCurrentStreak(groupedRecords: DayRecord[]) {
   currentDate.setHours(0, 0, 0, 0);
 
   // 检查今天是否有记录
-  const todayStr = currentDate.toLocaleDateString('zh-CN');
-  const hasTodayRecord = sortedRecords.some(record => record.date === todayStr);
+  const todayStr = currentDate.toLocaleDateString("zh-CN");
+  const hasTodayRecord = sortedRecords.some((record) => record.date === todayStr);
 
   if (!hasTodayRecord) {
     // 如果今天没有记录，从昨天开始计算
@@ -291,12 +385,15 @@ function getTotalMinutes(day: (typeof records.value)[0]): number {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" class="w-45">
-              {{timeRangeOptions.find(opt => opt.value === timeRange)?.label || '选择时间范围'}}
+              {{ timeRangeOptions.find((opt) => opt.value === timeRange)?.label || "选择时间范围" }}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem v-for="option in timeRangeOptions" :key="option.value"
-              @click="handleTimeRangeChange(option.value)">
+            <DropdownMenuItem
+              v-for="option in timeRangeOptions"
+              :key="option.value"
+              @click="handleTimeRangeChange(option.value)"
+            >
               {{ option.label }}
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -362,7 +459,7 @@ function getTotalMinutes(day: (typeof records.value)[0]): number {
       </Card>
       <Card>
         <CardContent class="p-4">
-          <div class="flex items-center gap-3 mb-3">
+          <div class="mb-3 flex items-center gap-3">
             <div class="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500/10">
               <Clock class="h-5 w-5 text-purple-500" />
             </div>
@@ -409,11 +506,16 @@ function getTotalMinutes(day: (typeof records.value)[0]): number {
               <p class="text-sm text-muted-foreground">当日无训练记录</p>
             </div>
             <div v-else class="grid gap-2">
-              <div v-for="training in record.trainings" :key="training.title"
-                class="flex items-center justify-between rounded-lg border p-3">
+              <div
+                v-for="training in record.trainings"
+                :key="training.title"
+                class="flex items-center justify-between rounded-lg border p-3"
+              >
                 <div class="flex items-center gap-3">
-                  <div class="flex h-8 w-8 items-center justify-center rounded-full"
-                    :class="training.completed ? 'bg-primary/10' : 'bg-muted'">
+                  <div
+                    class="flex h-8 w-8 items-center justify-center rounded-full"
+                    :class="training.completed ? 'bg-primary/10' : 'bg-muted'"
+                  >
                     <CheckCircle v-if="training.completed" class="h-4 w-4 text-primary" />
                     <XCircle v-else class="h-4 w-4 text-muted-foreground" />
                   </div>
@@ -423,8 +525,15 @@ function getTotalMinutes(day: (typeof records.value)[0]): number {
                 </div>
                 <div class="flex items-center gap-2">
                   <span class="text-sm text-muted-foreground">{{ training.duration }}</span>
-                  <Badge variant="outline" class="text-xs"
-                    :class="training.completionRate >= 100 ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'">
+                  <Badge
+                    variant="outline"
+                    class="text-xs"
+                    :class="
+                      training.completionRate >= 100
+                        ? 'bg-green-500/10 text-green-500'
+                        : 'bg-yellow-500/10 text-yellow-500'
+                    "
+                  >
                     {{ training.completionRate }}%
                   </Badge>
                 </div>
@@ -440,9 +549,7 @@ function getTotalMinutes(day: (typeof records.value)[0]): number {
         <CardContent class="flex flex-col items-center justify-center gap-4 p-6 text-center">
           <div class="text-lg font-medium">请登录以查看个人训练记录</div>
           <p class="text-sm text-muted-foreground">登录后可以查看个人训练历史和统计数据</p>
-          <Button @click="router.push('/login')">
-            立即登录
-          </Button>
+          <Button @click="router.push('/login')"> 立即登录 </Button>
         </CardContent>
       </Card>
     </section>

@@ -10,7 +10,6 @@ import { api } from "@/services/api";
 
 const router = useRouter();
 const loading = ref(true);
-const isLoggedIn = ref(!!api.getToken());
 
 const todayTraining = ref({
   title: "肩颈放松训练",
@@ -38,7 +37,7 @@ async function loadData() {
   loading.value = true;
   try {
     const categoriesRes = await api.getTrainingCategories();
-    
+
     if (categoriesRes.success && categoriesRes.data) {
       categories.value = categoriesRes.data;
     }
@@ -47,11 +46,16 @@ async function loadData() {
     if (isLoggedIn) {
       const [recordsRes, todayPlanRes] = await Promise.all([
         api.getTrainingRecords(7),
-        api.getTodayPlan()
+        api.getTodayPlan(),
       ]);
 
       if (recordsRes.success && recordsRes.data) {
-        recentRecords.value = recordsRes.data.slice(0, 3);
+        recentRecords.value = recordsRes.data.records.slice(0, 3).map((r) => ({
+          date: r.date,
+          title: r.trainings[0]?.title || "",
+          duration: r.trainings[0]?.duration || "",
+          completed: r.trainings[0]?.completed || false,
+        }));
       }
 
       if (todayPlanRes.success && todayPlanRes.data) {

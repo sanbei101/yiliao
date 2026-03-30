@@ -131,7 +131,9 @@ async function completeTraining() {
   let actualDurationSeconds = elapsedTime.value;
 
   if (startTime.value && endTime.value) {
-    actualDurationSeconds = Math.floor((endTime.value.getTime() - startTime.value.getTime()) / 1000);
+    actualDurationSeconds = Math.floor(
+      (endTime.value.getTime() - startTime.value.getTime()) / 1000,
+    );
   }
 
   // 确保至少有1秒的训练时长
@@ -146,7 +148,7 @@ async function completeTraining() {
       end_time: endTime.value ? endTime.value.toISOString() : new Date().toISOString(),
       actual_duration_seconds: actualDurationSeconds,
       completed: true,
-      source: "free_training"
+      source: "free_training",
     });
 
     if (response.success) {
@@ -178,7 +180,9 @@ async function completeTraining() {
             <div class="relative aspect-video bg-muted">
               <div class="absolute inset-0 flex items-center justify-center">
                 <div class="text-center">
-                  <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                  <div
+                    class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10"
+                  >
                     <Play v-if="!training.isPlaying" class="h-8 w-8 text-primary" />
                     <Pause v-else class="h-8 w-8 text-primary" />
                   </div>
@@ -196,7 +200,9 @@ async function completeTraining() {
                 <div class="flex items-center gap-2">
                   <Clock class="h-4 w-4 text-muted-foreground" />
                   <span class="text-sm font-medium">
-                    {{ Math.floor(elapsedTime / 60) }}:{{ String(elapsedTime % 60).padStart(2, '0') }}
+                    {{ Math.floor(elapsedTime / 60) }}:{{
+                      String(elapsedTime % 60).padStart(2, "0")
+                    }}
                   </span>
                 </div>
                 <div class="flex items-center gap-2">
@@ -240,12 +246,17 @@ async function completeTraining() {
             <CardTitle>训练步骤</CardTitle>
           </CardHeader>
           <CardContent class="grid gap-3">
-            <div v-for="(step, index) in training.steps" :key="index"
+            <div
+              v-for="(step, index) in training.steps"
+              :key="index"
               class="flex items-center justify-between rounded-lg border p-3"
-              :class="step.completed ? 'border-primary/20 bg-primary/5' : ''">
+              :class="step.completed ? 'border-primary/20 bg-primary/5' : ''"
+            >
               <div class="flex items-center gap-3">
-                <div class="flex h-6 w-6 items-center justify-center rounded-full text-xs"
-                  :class="step.completed ? 'bg-primary text-primary-foreground' : 'bg-muted'">
+                <div
+                  class="flex h-6 w-6 items-center justify-center rounded-full text-xs"
+                  :class="step.completed ? 'bg-primary text-primary-foreground' : 'bg-muted'"
+                >
                   <CheckCircle v-if="step.completed" class="h-4 w-4" />
                   <span v-else>{{ index + 1 }}</span>
                 </div>
@@ -267,8 +278,11 @@ async function completeTraining() {
           </CardHeader>
           <CardContent>
             <ul class="grid gap-2">
-              <li v-for="(precaution, index) in training.precautions" :key="index"
-                class="flex items-start gap-2 text-sm">
+              <li
+                v-for="(precaution, index) in training.precautions"
+                :key="index"
+                class="flex items-start gap-2 text-sm"
+              >
                 <Info class="mt-0.5 h-4 w-4 text-muted-foreground" />
                 <span>{{ precaution }}</span>
               </li>

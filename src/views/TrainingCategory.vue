@@ -78,26 +78,26 @@ async function loadData() {
   try {
     const [categoriesRes, videosRes] = await Promise.all([
       api.getTrainingCategories(),
-      api.getTrainingVideos()
+      api.getTrainingVideos(),
     ]);
 
     if (categoriesRes.success && categoriesRes.data) {
-      categories.value = categoriesRes.data.map(cat => ({
+      categories.value = categoriesRes.data.map((cat) => ({
         id: cat.id.toString(),
         name: cat.name,
         description: "",
-        count: cat.count
+        count: cat.count,
       }));
     }
 
     if (videosRes.success && videosRes.data) {
-      trainings.value = videosRes.data.map(video => ({
+      trainings.value = videosRes.data.map((video) => ({
         id: video.id.toString(),
         title: video.title,
         category: video.categories?.[0]?.name || "未分类",
         duration: video.duration,
         difficulty: "入门",
-        description: video.description || ""
+        description: video.description || "",
       }));
     }
   } catch (error) {
@@ -130,13 +130,13 @@ async function loadVideos(categoryId?: number) {
   try {
     const response = await api.getTrainingVideos(categoryId);
     if (response.success && response.data) {
-      trainings.value = response.data.map(video => ({
+      trainings.value = response.data.map((video) => ({
         id: video.id.toString(),
         title: video.title,
         category: video.categories?.[0]?.name || "未分类",
         duration: video.duration,
         difficulty: "入门",
-        description: video.description || ""
+        description: video.description || "",
       }));
     }
   } catch (error) {

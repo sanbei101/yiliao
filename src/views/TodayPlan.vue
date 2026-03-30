@@ -13,7 +13,7 @@ const loading = ref(true);
 const isLoggedIn = ref(!!api.getToken());
 
 const todayPlan = ref({
-  date: new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' }),
+  date: new Date().toLocaleDateString("zh-CN", { year: "numeric", month: "long", day: "numeric" }),
   totalDuration: "33分钟",
   completedCount: 0,
   totalCount: 3,
@@ -84,12 +84,12 @@ async function loadTodayPlan() {
 
 function handleDragStart(event: DragEvent, item: TrainingItem) {
   draggedItem.value = item;
-  event.dataTransfer!.effectAllowed = 'move';
+  event.dataTransfer!.effectAllowed = "move";
 }
 
 function handleDragOver(event: DragEvent) {
   event.preventDefault();
-  event.dataTransfer!.dropEffect = 'move';
+  event.dataTransfer!.dropEffect = "move";
 }
 
 function handleDragEnter(event: DragEvent, item: TrainingItem) {
@@ -106,8 +106,8 @@ function handleDrop(event: DragEvent, targetItem: TrainingItem) {
 
   if (draggedItem.value && draggedItem.value !== targetItem) {
     const draggedId = draggedItem.value.id;
-    const draggedIndex = trainingList.value.findIndex(item => item.id === draggedId);
-    const targetIndex = trainingList.value.findIndex(item => item.id === targetItem.id);
+    const draggedIndex = trainingList.value.findIndex((item) => item.id === draggedId);
+    const targetIndex = trainingList.value.findIndex((item) => item.id === targetItem.id);
 
     // 重新排序
     const [removed] = trainingList.value.splice(draggedIndex, 1);
@@ -123,7 +123,6 @@ function handleDrop(event: DragEvent, targetItem: TrainingItem) {
   dragOverItem.value = null;
 }
 
-
 onMounted(() => {
   loadTodayPlan();
 });
@@ -135,16 +134,16 @@ function goBack() {
 // 根据训练分类找到对应的训练视频
 function getTrainingVideoIdByCategory(category: string): string {
   const categoryToVideoId: Record<string, string> = {
-    '关节舒缓': '1', // 肩颈活动训练
-    '力量训练': '3', // 腿部力量训练
-    '平衡训练': '7'  // 站立平衡训练
+    关节舒缓: "1", // 肩颈活动训练
+    力量训练: "3", // 腿部力量训练
+    平衡训练: "7", // 站立平衡训练
   };
-  return categoryToVideoId[category] || '1';
+  return categoryToVideoId[category] || "1";
 }
 
 function goToTraining(id: string) {
   // 根据训练分类找到对应的视频ID
-  const training = trainingList.value.find(t => t.id === id);
+  const training = trainingList.value.find((t) => t.id === id);
   if (training) {
     const videoId = getTrainingVideoIdByCategory(training.title);
     router.push(`/training/${videoId}`);
@@ -179,9 +178,7 @@ function startNextTraining() {
         <CardContent class="flex flex-col items-center justify-center gap-4 p-6 text-center">
           <div class="text-lg font-medium">请登录以查看个人训练计划</div>
           <p class="text-sm text-muted-foreground">登录后可以查看个性化的训练计划和记录</p>
-          <Button @click="router.push('/login')">
-            立即登录
-          </Button>
+          <Button @click="router.push('/login')"> 立即登录 </Button>
         </CardContent>
       </Card>
     </div>
@@ -208,32 +205,54 @@ function startNextTraining() {
       <section>
         <div class="mb-4">
           <h2 class="text-xl font-semibold tracking-tight">训练顺序</h2>
-          <p class="text-sm text-muted-foreground">按顺序完成训练效果更佳，您可以拖动设置适合自己的顺序</p>
+          <p class="text-sm text-muted-foreground">
+            按顺序完成训练效果更佳，您可以拖动设置适合自己的顺序
+          </p>
         </div>
         <div class="grid gap-3">
-          <Card v-for="training in trainingList" :key="training.id"
+          <Card
+            v-for="training in trainingList"
+            :key="training.id"
             class="cursor-pointer transition-colors hover:bg-accent"
-            :class="{ 'border-primary': training.current, 'border-dashed': dragOverItem?.id === training.id }"
-            draggable="true" @dragstart="handleDragStart($event, training)" @dragover="handleDragOver"
-            @dragenter="handleDragEnter($event, training)" @dragleave="handleDragLeave"
-            @drop="handleDrop($event, training)" @click="goToTraining(training.id)">
+            :class="{
+              'border-primary': training.current,
+              'border-dashed': dragOverItem?.id === training.id,
+            }"
+            draggable="true"
+            @dragstart="handleDragStart($event, training)"
+            @dragover="handleDragOver"
+            @dragenter="handleDragEnter($event, training)"
+            @dragleave="handleDragLeave"
+            @drop="handleDrop($event, training)"
+            @click="goToTraining(training.id)"
+          >
             <CardContent class="flex items-center justify-between p-4">
               <div class="flex items-center gap-4">
-                <button class="flex h-10 w-10 items-center justify-center rounded-full cursor-move" @click.stop>
+                <button
+                  class="flex h-10 w-10 cursor-move items-center justify-center rounded-full"
+                  @click.stop
+                >
                   <GripVertical class="h-5 w-5 text-muted-foreground" />
                 </button>
-                <div class="flex h-10 w-10 items-center justify-center rounded-full" :class="training.completed
-                  ? 'bg-primary/10'
-                  : training.current
-                    ? 'bg-primary/20'
-                    : 'bg-muted'
-                  ">
+                <div
+                  class="flex h-10 w-10 items-center justify-center rounded-full"
+                  :class="
+                    training.completed
+                      ? 'bg-primary/10'
+                      : training.current
+                        ? 'bg-primary/20'
+                        : 'bg-muted'
+                  "
+                >
                   <CheckCircle v-if="training.completed" class="h-5 w-5 text-primary" />
                   <Circle v-else-if="training.current" class="h-5 w-5 text-primary" />
                   <span v-else class="text-sm font-medium">{{ training.order }}</span>
                 </div>
                 <div class="grid gap-0.5">
-                  <p class="font-medium" :class="training.completed ? 'text-muted-foreground line-through' : ''">
+                  <p
+                    class="font-medium"
+                    :class="training.completed ? 'text-muted-foreground line-through' : ''"
+                  >
                     {{ training.title }}
                   </p>
                   <p class="flex items-center gap-2 text-xs text-muted-foreground">
@@ -259,7 +278,7 @@ function startNextTraining() {
       <div v-if="!trainingList.every((t) => t.completed)" class="mt-6">
         <Button class="w-full" size="lg" @click="startNextTraining">
           <Play class="mr-2 h-5 w-5" />
-          {{trainingList.find((t) => t.current) ? "继续当前训练" : "开始下一个训练"}}
+          {{ trainingList.find((t) => t.current) ? "继续当前训练" : "开始下一个训练" }}
         </Button>
       </div>
 

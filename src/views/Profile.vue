@@ -71,7 +71,7 @@ async function updateProfile() {
       user_name: userInfo.value.user_name,
       gender: userInfo.value.gender || "",
       phone: userInfo.value.phone || "",
-      age: userInfo.value.age || 0
+      age: userInfo.value.age || 0,
     });
 
     if (response.success) {
@@ -100,7 +100,7 @@ async function changePassword() {
   try {
     const response = await api.changePassword({
       oldPassword: passwordForm.value.oldPassword,
-      newPassword: passwordForm.value.newPassword
+      newPassword: passwordForm.value.newPassword,
     });
 
     if (response.success) {
@@ -147,7 +147,13 @@ onMounted(() => {
               <div class="text-center">
                 <h2 class="text-xl font-semibold">{{ userInfo.user_name }}</h2>
                 <p class="text-sm text-muted-foreground">
-                  {{ userInfo.role === "elder" ? "老人" : userInfo.role === "child" ? "子女" : "管理员" }}
+                  {{
+                    userInfo.role === "elder"
+                      ? "老人"
+                      : userInfo.role === "child"
+                        ? "子女"
+                        : "管理员"
+                  }}
                 </p>
               </div>
               <Separator class="my-4 w-full" />
@@ -158,11 +164,14 @@ onMounted(() => {
                 </div>
                 <div class="flex items-center justify-between">
                   <span class="text-muted-foreground">注册时间</span>
-                  <span>{{ userInfo.created_at ? new Date(userInfo.created_at).toLocaleDateString('zh-CN') : '未知'
-                    }}</span>
+                  <span>{{
+                    userInfo.created_at
+                      ? new Date(userInfo.created_at).toLocaleDateString("zh-CN")
+                      : "未知"
+                  }}</span>
                 </div>
               </div>
-              <Button variant="destructive" class="w-full mt-4" @click="logout">
+              <Button variant="destructive" class="mt-4 w-full" @click="logout">
                 <LogOut class="mr-2 h-4 w-4" />
                 退出登录
               </Button>
@@ -173,13 +182,19 @@ onMounted(() => {
 
       <div class="lg:col-span-2">
         <div class="mb-4 flex gap-2">
-          <Button variant="outline" :class="{ 'bg-primary text-primary-foreground': activeTab === 'profile' }"
-            @click="activeTab = 'profile'">
+          <Button
+            variant="outline"
+            :class="{ 'bg-primary text-primary-foreground': activeTab === 'profile' }"
+            @click="activeTab = 'profile'"
+          >
             <User class="mr-2 h-4 w-4" />
             个人资料
           </Button>
-          <Button variant="outline" :class="{ 'bg-primary text-primary-foreground': activeTab === 'password' }"
-            @click="activeTab = 'password'">
+          <Button
+            variant="outline"
+            :class="{ 'bg-primary text-primary-foreground': activeTab === 'password' }"
+            @click="activeTab = 'password'"
+          >
             <Key class="mr-2 h-4 w-4" />
             修改密码
           </Button>
@@ -191,10 +206,10 @@ onMounted(() => {
             <CardDescription>管理您的个人信息</CardDescription>
           </CardHeader>
           <CardContent class="space-y-4">
-            <div v-if="error" class="rounded-lg bg-destructive/10 p-3 text-destructive text-sm">
+            <div v-if="error" class="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
               {{ error }}
             </div>
-            <div v-if="success" class="rounded-lg bg-green-500/10 p-3 text-green-500 text-sm">
+            <div v-if="success" class="rounded-lg bg-green-500/10 p-3 text-sm text-green-500">
               {{ success }}
             </div>
 
@@ -206,12 +221,18 @@ onMounted(() => {
             <div class="space-y-2">
               <Label for="gender">性别</Label>
               <div class="flex gap-2">
-                <Button variant="outline" :class="{ 'bg-primary text-primary-foreground': userInfo.gender === '男' }"
-                  @click="userInfo.gender = '男'">
+                <Button
+                  variant="outline"
+                  :class="{ 'bg-primary text-primary-foreground': userInfo.gender === '男' }"
+                  @click="userInfo.gender = '男'"
+                >
                   男
                 </Button>
-                <Button variant="outline" :class="{ 'bg-primary text-primary-foreground': userInfo.gender === '女' }"
-                  @click="userInfo.gender = '女'">
+                <Button
+                  variant="outline"
+                  :class="{ 'bg-primary text-primary-foreground': userInfo.gender === '女' }"
+                  @click="userInfo.gender = '女'"
+                >
                   女
                 </Button>
               </div>
@@ -224,12 +245,15 @@ onMounted(() => {
 
             <div class="space-y-2">
               <Label for="age">年龄</Label>
-              <Input id="age" v-model.number="userInfo.age" type="number" placeholder="请输入年龄" />
+              <Input
+                id="age"
+                v-model.number="userInfo.age"
+                type="number"
+                placeholder="请输入年龄"
+              />
             </div>
 
-            <Button class="w-full" :disabled="loading" @click="updateProfile">
-              保存资料
-            </Button>
+            <Button class="w-full" :disabled="loading" @click="updateProfile"> 保存资料 </Button>
           </CardContent>
         </Card>
 
@@ -239,32 +263,44 @@ onMounted(() => {
             <CardDescription>设置新的登录密码</CardDescription>
           </CardHeader>
           <CardContent class="space-y-4">
-            <div v-if="error" class="rounded-lg bg-destructive/10 p-3 text-destructive text-sm">
+            <div v-if="error" class="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
               {{ error }}
             </div>
-            <div v-if="success" class="rounded-lg bg-green-500/10 p-3 text-green-500 text-sm">
+            <div v-if="success" class="rounded-lg bg-green-500/10 p-3 text-sm text-green-500">
               {{ success }}
             </div>
 
             <div class="space-y-2">
               <Label for="oldPassword">原密码</Label>
-              <Input id="oldPassword" v-model="passwordForm.oldPassword" type="password" placeholder="请输入原密码" />
+              <Input
+                id="oldPassword"
+                v-model="passwordForm.oldPassword"
+                type="password"
+                placeholder="请输入原密码"
+              />
             </div>
 
             <div class="space-y-2">
               <Label for="newPassword">新密码</Label>
-              <Input id="newPassword" v-model="passwordForm.newPassword" type="password" placeholder="请输入新密码" />
+              <Input
+                id="newPassword"
+                v-model="passwordForm.newPassword"
+                type="password"
+                placeholder="请输入新密码"
+              />
             </div>
 
             <div class="space-y-2">
               <Label for="confirmPassword">确认新密码</Label>
-              <Input id="confirmPassword" v-model="passwordForm.confirmPassword" type="password"
-                placeholder="请再次输入新密码" />
+              <Input
+                id="confirmPassword"
+                v-model="passwordForm.confirmPassword"
+                type="password"
+                placeholder="请再次输入新密码"
+              />
             </div>
 
-            <Button class="w-full" :disabled="loading" @click="changePassword">
-              修改密码
-            </Button>
+            <Button class="w-full" :disabled="loading" @click="changePassword"> 修改密码 </Button>
           </CardContent>
         </Card>
       </div>

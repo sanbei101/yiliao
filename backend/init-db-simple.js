@@ -1,16 +1,16 @@
-import mysql from 'mysql2/promise';
+import mysql from "mysql2/promise";
 
 async function initDatabase() {
   let connection;
   try {
     connection = await mysql.createConnection({
-      host: 'localhost',
-      user: 'root',
-      password: '',
-      database: 'yiliao'
+      host: "localhost",
+      user: "root",
+      password: "",
+      database: "yiliao",
     });
 
-    console.log('开始创建数据库表...');
+    console.log("开始创建数据库表...");
 
     await connection.execute(`CREATE DATABASE IF NOT EXISTS yiliao`);
     await connection.execute(`USE yiliao`);
@@ -187,7 +187,7 @@ async function initDatabase() {
       )
     `);
 
-    console.log('数据库表创建成功！');
+    console.log("数据库表创建成功！");
 
     await connection.execute(`
       INSERT INTO users (account, password_hash, user_name, role, status)
@@ -202,19 +202,19 @@ async function initDatabase() {
     `);
 
     const categories = [
-      { name: '手臂训练', parent_id: null },
-      { name: '腿脚训练', parent_id: null },
-      { name: '关节舒缓', parent_id: null },
-      { name: '坐着练', parent_id: null },
-      { name: '站着练', parent_id: null },
-      { name: '5分钟训练', parent_id: null },
-      { name: '10分钟训练', parent_id: null }
+      { name: "手臂训练", parent_id: null },
+      { name: "腿脚训练", parent_id: null },
+      { name: "关节舒缓", parent_id: null },
+      { name: "坐着练", parent_id: null },
+      { name: "站着练", parent_id: null },
+      { name: "5分钟训练", parent_id: null },
+      { name: "10分钟训练", parent_id: null },
     ];
 
     for (const category of categories) {
       await connection.execute(
-        'INSERT INTO training_categories (name, parent_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name)',
-        [category.name, category.parent_id]
+        "INSERT INTO training_categories (name, parent_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name)",
+        [category.name, category.parent_id],
       );
     }
 
@@ -236,10 +236,9 @@ async function initDatabase() {
       ON DUPLICATE KEY UPDATE title = VALUES(title)
     `);
 
-    console.log('初始化数据完成！');
-
+    console.log("初始化数据完成！");
   } catch (error) {
-    console.error('数据库初始化失败:', error);
+    console.error("数据库初始化失败:", error);
     throw error;
   } finally {
     if (connection) {
