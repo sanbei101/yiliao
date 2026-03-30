@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import {
   ArrowLeft,
@@ -14,11 +15,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { api } from "@/services/api";
 
 const route = useRoute();
 const router = useRouter();
+const loading = ref(true);
+const isLoggedIn = ref(!!api.getToken());
 
-const training = {
+const training = ref({
   id: route.params.id,
   title: "肩颈活动训练",
   category: "关节舒缓",
@@ -41,18 +45,121 @@ const training = {
   ],
   progress: 0,
   isPlaying: false,
-};
+});
+
+const startTime = ref<Date | null>(null);
+const endTime = ref<Date | null>(null);
+const elapsedTime = ref(0);
+let timerInterval: number | null = null;
+
+async function loadTrainingDetail() {
+  loading.value = true;
+  try {
+    const response = await api.getVideoDetail(parseInt(route.params.id as string));
+    if (response.success && response.data) {
+      const data = response.data;
+      training.value = {
+        ...training.value,
+        title: data.title,
+        duration: data.duration,
+        description: data.description || training.value.description,
+      };
+    }
+  } catch (error) {
+    console.error("加载训练详情失败:", error);
+  } finally {
+    loading.value = false;
+  }
+}
+
+onMounted(() => {
+  loadTrainingDetail();
+});
 
 function goBack() {
   router.back();
 }
 
 function togglePlay() {
-  training.isPlaying = !training.isPlaying;
+  training.value.isPlaying = !training.value.isPlaying;
+  
+  if (training.value.isPlaying) {
+    // 开始训练，记录开始时间
+    startTime.value = new Date();
+    startTimer();
+  } else {
+    // 暂停训练，记录结束时间
+    endTime.value = new Date();
+    stopTimer();
+  }
 }
 
-function completeTraining() {
-  router.push("/today-plan");
+function startTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+  }
+  
+  timerInterval = window.setInterval(() => {
+    if (startTime.value) {
+      const now = new Date();
+      const diff = Math.floor((now.getTime() - startTime.value.getTime()) / 1000);
+      elapsedTime.value = diff;
+    }
+  }, 1000);
+}
+
+function stopTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+}
+
+async function completeTraining() {
+  const isLoggedIn = !!api.getToken();
+  if (!isLoggedIn) {
+    router.push("/login");
+    return;
+  }
+  
+  // 停止计时器
+  stopTimer();
+  
+  // 设置结束时间
+  endTime.value = new Date();
+  
+  // 计算实际训练时长（秒）
+  let actualDurationSeconds = elapsedTime.value;
+  
+  if (startTime.value && endTime.value) {
+    actualDurationSeconds = Math.floor((endTime.value.getTime() - startTime.value.getTime()) / 1000);
+  }
+  
+  // 确保至少有1秒的训练时长
+  if (actualDurationSeconds< 1) {
+    actualDurationSeconds = 1;
+  }
+  
+  try {
+    const response = await api.createTrainingRecord({
+      video_id: parseInt(route.params.id as string),
+      start_time: startTime.value ? startTime.value.toISOString() : new Date().toISOString(),
+      end_time: endTime.value ? endTime.value.toISOString() : new Date().toISOString(),
+      actual_duration_seconds: actualDurationSeconds,
+      completed: true,
+      source: "free_training"
+    });
+    
+    if (response.success) {
+      router.push("/today-plan");
+    } else {
+      console.error("创建训练记录失败:", response.error);
+      router.push("/today-plan");
+    }
+  } catch (error) {
+    console.error("创建训练记录失败:", error);
+    router.push("/today-plan");
+  }
 }
 </script>
 
@@ -84,16 +191,25 @@ function completeTraining() {
             </div>
             <div class="flex items-center justify-between p-4">
               <Button @click="togglePlay">
-                <Play class="mr-2 h-4 w-4" />
+                <Play v-if="!training.isPlaying" class="mr-2 h-4 w-4" />
+                <Pause v-else class="mr-2 h-4 w-4" />
                 {{ training.isPlaying ? "暂停" : "开始训练" }}
               </Button>
-              <div class="flex items-center gap-2">
-                <Button variant="outline" size="icon">
-                  <Speaker class="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="icon">
-                  <ListChecks class="h-4 w-4" />
-                </Button>
+              <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                  <Clock class="h-4 w-4 text-muted-foreground" />
+                  <span class="text-sm font-medium">
+                    {{ Math.floor(elapsedTime / 60) }}:{{ String(elapsedTime % 60).padStart(2, '0') }}
+                  </span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <Button variant="outline" size="icon">
+                    <Speaker class="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="icon">
+                    <ListChecks class="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           </CardContent>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { RouterLink, RouterView, useRouter } from "vue-router";
-import { Activity, Calendar, Home, ListVideo, Moon, Sun } from "lucide-vue-next";
+import { Activity, Calendar, Home, ListVideo, Moon, Sun, User } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,6 +14,7 @@ const navItems = [
   { name: "训练分类", path: "/training-category", icon: ListVideo },
   { name: "今日计划", path: "/today-plan", icon: Calendar },
   { name: "训练记录", path: "/training-record", icon: Activity },
+  { name: "个人中心", path: "/profile", icon: User },
 ];
 const router = useRouter();
 function goToHome() {
