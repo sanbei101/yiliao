@@ -29,12 +29,12 @@ const stats = ref({
   currentStreak: 0,
   completionRate: 0,
   targetMinutes: 33, // 每日目标训练时长（分钟）
-  todayDurationPercentage: []
+  todayDurationPercentage: [] as { title: string; duration: number; percentage: number }[]
 });
 
 // 时间范围选择
 const timeRange = ref("7"); // 默认显示近7天
-const timeRangeOptions = [
+const timeRangeOptions: { value: string; label: string }[] = [
   { value: "today", label: "今日" },
   { value: "7", label: "近7天" },
   { value: "30", label: "近30天" },
@@ -42,7 +42,22 @@ const timeRangeOptions = [
   { value: "365", label: "1年" },
 ];
 
-const records = ref([
+type TrainingRecordItem = {
+  title: string;
+  duration: string;
+  completed: boolean;
+  targetDuration: number;
+  actualDuration: number;
+  completionRate: number;
+};
+
+type DayRecord = {
+  date: string;
+  dayOfWeek: string;
+  trainings: TrainingRecordItem[];
+};
+
+const records = ref<DayRecord[]>([
   {
     date: "2026年3月26日",
     dayOfWeek: "周四",
@@ -94,7 +109,7 @@ async function loadTrainingRecords() {
     loading.value = false;
     return;
   }
-  
+
   loading.value = true;
   try {
     // 根据选择的时间范围确定天数
@@ -104,12 +119,23 @@ async function loadTrainingRecords() {
     } else {
       days = parseInt(timeRange.value);
     }
-    
+
     const response = await api.getTrainingRecords(days);
     if (response.success && response.data) {
       // 直接使用后端返回的数据结构
-      records.value = response.data.records || [];
-      
+      records.value = (response.data.records || []).map((record: { date: string; dayOfWeek: string; trainings: { title: string; duration: string; completed: boolean; targetDuration?: number; actualDuration?: number; completionRate?: number }[] }) => ({
+        date: record.date,
+        dayOfWeek: record.dayOfWeek,
+        trainings: record.trainings.map(t => ({
+          title: t.title,
+          duration: t.duration,
+          completed: t.completed,
+          targetDuration: t.targetDuration || 0,
+          actualDuration: t.actualDuration || 0,
+          completionRate: t.completionRate || 0
+        }))
+      }));
+
       // 更新统计数据
       if (response.data.stats) {
         stats.value = {
@@ -131,30 +157,30 @@ async function loadTrainingRecords() {
   }
 }
 
-function calculateStats(groupedRecords) {
+function calculateStats(groupedRecords: DayRecord[]) {
   let totalMinutes = 0;
   let totalTrainings = 0;
   let completedTrainings = 0;
-  
+
   // 获取今天的日期字符串（格式：YYYY年M月D日）
   const today = new Date();
   const todayStr = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`;
-  
+
   let todayActualMinutes = 0;
-  let todayTrainingDetails = [];
-  
-  groupedRecords.forEach(day => {
-    day.trainings.forEach(training => {
+  let todayTrainingDetails: { title: string; duration: number; targetDuration: number }[] = [];
+
+  groupedRecords.forEach((day: DayRecord) => {
+    day.trainings.forEach((training: TrainingRecordItem) => {
       totalTrainings++;
       if (training.completed) {
         completedTrainings++;
       }
-      
+
       // 累计总时长
       if (training.actualDuration) {
         totalMinutes += training.actualDuration;
       }
-      
+
       // 计算今日进度
       if (day.date === todayStr && training.actualDuration) {
         todayActualMinutes += training.actualDuration;
@@ -166,13 +192,13 @@ function calculateStats(groupedRecords) {
       }
     });
   });
-  
+
   // 计算连续训练天数
   const currentStreak = calculateCurrentStreak(groupedRecords);
-  
+
   // 计算完成率：今日实际训练时长 / 今日目标训练时长（固定33分钟）
   const completionRate = stats.value.targetMinutes > 0 ? Math.round((todayActualMinutes / stats.value.targetMinutes) * 100) : 0;
-  
+
   // 计算今日各训练项目的时长占比
   const todayDurationPercentage = todayTrainingDetails.map(training => {
     const percentage = todayActualMinutes > 0 ? Math.round((training.duration / todayActualMinutes) * 100) : 0;
@@ -182,7 +208,7 @@ function calculateStats(groupedRecords) {
       percentage: percentage
     };
   });
-  
+
   stats.value = {
     totalDays: groupedRecords.length,
     totalMinutes: todayActualMinutes, // 显示今日训练时长
@@ -193,34 +219,39 @@ function calculateStats(groupedRecords) {
   };
 }
 
-function calculateCurrentStreak(groupedRecords) {
+function handleTimeRangeChange(optionValue: string) {
+  timeRange.value = optionValue;
+  loadTrainingRecords();
+}
+
+function calculateCurrentStreak(groupedRecords: DayRecord[]) {
   if (groupedRecords.length === 0) return 0;
-  
+
   // 将记录按日期排序（最新的在前）
   const sortedRecords = [...groupedRecords].sort((a, b) => {
     return new Date(b.date).getTime() - new Date(a.date).getTime();
   });
-  
+
   let streak = 0;
   let currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0);
-  
+
   // 检查今天是否有记录
   const todayStr = currentDate.toLocaleDateString('zh-CN');
   const hasTodayRecord = sortedRecords.some(record => record.date === todayStr);
-  
+
   if (!hasTodayRecord) {
     // 如果今天没有记录，从昨天开始计算
     currentDate.setDate(currentDate.getDate() - 1);
   }
-  
+
   for (const record of sortedRecords) {
     const recordDate = new Date(record.date);
     recordDate.setHours(0, 0, 0, 0);
-    
+
     const diffTime = currentDate.getTime() - recordDate.getTime();
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === streak) {
       streak++;
       currentDate.setDate(currentDate.getDate() - 1);
@@ -228,14 +259,8 @@ function calculateCurrentStreak(groupedRecords) {
       break;
     }
   }
-  
-  return streak;
-}
 
-function getDayOfWeek(dateStr: string): string {
-  const date = new Date(dateStr);
-  const days = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
-  return days[date.getDay()];
+  return streak;
 }
 
 onMounted(() => {
@@ -265,16 +290,13 @@ function getTotalMinutes(day: (typeof records.value)[0]): number {
       <div class="flex items-center gap-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" class="w-[180px]">
-              {{ timeRangeOptions.find(opt => opt.value === timeRange.value)?.label || '选择时间范围' }}
+            <Button variant="outline" class="w-45">
+              {{timeRangeOptions.find(opt => opt.value === timeRange)?.label || '选择时间范围'}}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem 
-              v-for="option in timeRangeOptions" 
-              :key="option.value"
-              @click="timeRange.value = option.value; loadTrainingRecords()"
-            >
+            <DropdownMenuItem v-for="option in timeRangeOptions" :key="option.value"
+              @click="handleTimeRangeChange(option.value)">
               {{ option.label }}
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -387,16 +409,11 @@ function getTotalMinutes(day: (typeof records.value)[0]): number {
               <p class="text-sm text-muted-foreground">当日无训练记录</p>
             </div>
             <div v-else class="grid gap-2">
-              <div
-                v-for="training in record.trainings"
-                :key="training.title"
-                class="flex items-center justify-between rounded-lg border p-3"
-              >
+              <div v-for="training in record.trainings" :key="training.title"
+                class="flex items-center justify-between rounded-lg border p-3">
                 <div class="flex items-center gap-3">
-                  <div
-                    class="flex h-8 w-8 items-center justify-center rounded-full"
-                    :class="training.completed ? 'bg-primary/10' : 'bg-muted'"
-                  >
+                  <div class="flex h-8 w-8 items-center justify-center rounded-full"
+                    :class="training.completed ? 'bg-primary/10' : 'bg-muted'">
                     <CheckCircle v-if="training.completed" class="h-4 w-4 text-primary" />
                     <XCircle v-else class="h-4 w-4 text-muted-foreground" />
                   </div>
@@ -406,7 +423,8 @@ function getTotalMinutes(day: (typeof records.value)[0]): number {
                 </div>
                 <div class="flex items-center gap-2">
                   <span class="text-sm text-muted-foreground">{{ training.duration }}</span>
-                  <Badge variant="outline" class="text-xs" :class="training.completionRate >= 100 ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'">
+                  <Badge variant="outline" class="text-xs"
+                    :class="training.completionRate >= 100 ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'">
                     {{ training.completionRate }}%
                   </Badge>
                 </div>
@@ -416,7 +434,7 @@ function getTotalMinutes(day: (typeof records.value)[0]): number {
         </Card>
       </div>
     </section>
-    
+
     <section v-else class="mt-6">
       <Card class="border-primary/50 bg-primary/5">
         <CardContent class="flex flex-col items-center justify-center gap-4 p-6 text-center">

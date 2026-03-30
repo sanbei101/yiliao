@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { ArrowLeft, LogOut, User, Key, Mail, Phone, Calendar } from "lucide-vue-next";
+import { ArrowLeft, LogOut, User, Key } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,9 +19,10 @@ const userInfo = ref({
   account: "",
   user_name: "",
   role: "",
-  gender: "",
-  phone: "",
-  age: 0,
+  gender: undefined as string | undefined,
+  phone: undefined as string | undefined,
+  age: undefined as number | undefined,
+  created_at: undefined as string | undefined,
 });
 
 const passwordForm = ref({
@@ -38,10 +39,19 @@ async function loadUserInfo() {
       router.push("/login");
       return;
     }
-    
+
     const response = await api.getUserProfile();
     if (response.success && response.data) {
-      userInfo.value = response.data;
+      userInfo.value = {
+        id: response.data.id,
+        account: response.data.account,
+        user_name: response.data.user_name,
+        role: response.data.role,
+        gender: response.data.gender,
+        phone: response.data.phone,
+        age: response.data.age,
+        created_at: response.data.created_at,
+      };
     } else {
       error.value = response.error || "加载用户信息失败";
     }
@@ -59,11 +69,11 @@ async function updateProfile() {
   try {
     const response = await api.updateUserProfile({
       user_name: userInfo.value.user_name,
-      gender: userInfo.value.gender,
-      phone: userInfo.value.phone,
-      age: userInfo.value.age
+      gender: userInfo.value.gender || "",
+      phone: userInfo.value.phone || "",
+      age: userInfo.value.age || 0
     });
-    
+
     if (response.success) {
       success.value = response.data?.message || "个人资料更新成功";
     } else {
@@ -92,7 +102,7 @@ async function changePassword() {
       oldPassword: passwordForm.value.oldPassword,
       newPassword: passwordForm.value.newPassword
     });
-    
+
     if (response.success) {
       success.value = response.data?.message || "密码修改成功";
       passwordForm.value = { oldPassword: "", newPassword: "", confirmPassword: "" };
@@ -148,7 +158,8 @@ onMounted(() => {
                 </div>
                 <div class="flex items-center justify-between">
                   <span class="text-muted-foreground">注册时间</span>
-                  <span>{{ userInfo.created_at ? new Date(userInfo.created_at).toLocaleDateString('zh-CN') : '未知' }}</span>
+                  <span>{{ userInfo.created_at ? new Date(userInfo.created_at).toLocaleDateString('zh-CN') : '未知'
+                    }}</span>
                 </div>
               </div>
               <Button variant="destructive" class="w-full mt-4" @click="logout">
@@ -162,19 +173,13 @@ onMounted(() => {
 
       <div class="lg:col-span-2">
         <div class="mb-4 flex gap-2">
-          <Button
-            variant="outline"
-            :class="{ 'bg-primary text-primary-foreground': activeTab === 'profile' }"
-            @click="activeTab = 'profile'"
-          >
+          <Button variant="outline" :class="{ 'bg-primary text-primary-foreground': activeTab === 'profile' }"
+            @click="activeTab = 'profile'">
             <User class="mr-2 h-4 w-4" />
             个人资料
           </Button>
-          <Button
-            variant="outline"
-            :class="{ 'bg-primary text-primary-foreground': activeTab === 'password' }"
-            @click="activeTab = 'password'"
-          >
+          <Button variant="outline" :class="{ 'bg-primary text-primary-foreground': activeTab === 'password' }"
+            @click="activeTab = 'password'">
             <Key class="mr-2 h-4 w-4" />
             修改密码
           </Button>
@@ -195,28 +200,18 @@ onMounted(() => {
 
             <div class="space-y-2">
               <Label for="user_name">姓名</Label>
-              <Input
-                id="user_name"
-                v-model="userInfo.user_name"
-                placeholder="请输入姓名"
-              />
+              <Input id="user_name" v-model="userInfo.user_name" placeholder="请输入姓名" />
             </div>
 
             <div class="space-y-2">
               <Label for="gender">性别</Label>
               <div class="flex gap-2">
-                <Button
-                  variant="outline"
-                  :class="{ 'bg-primary text-primary-foreground': userInfo.gender === '男' }"
-                  @click="userInfo.gender = '男'"
-                >
+                <Button variant="outline" :class="{ 'bg-primary text-primary-foreground': userInfo.gender === '男' }"
+                  @click="userInfo.gender = '男'">
                   男
                 </Button>
-                <Button
-                  variant="outline"
-                  :class="{ 'bg-primary text-primary-foreground': userInfo.gender === '女' }"
-                  @click="userInfo.gender = '女'"
-                >
+                <Button variant="outline" :class="{ 'bg-primary text-primary-foreground': userInfo.gender === '女' }"
+                  @click="userInfo.gender = '女'">
                   女
                 </Button>
               </div>
@@ -224,21 +219,12 @@ onMounted(() => {
 
             <div class="space-y-2">
               <Label for="phone">手机号</Label>
-              <Input
-                id="phone"
-                v-model="userInfo.phone"
-                placeholder="请输入手机号"
-              />
+              <Input id="phone" v-model="userInfo.phone" placeholder="请输入手机号" />
             </div>
 
             <div class="space-y-2">
               <Label for="age">年龄</Label>
-              <Input
-                id="age"
-                v-model.number="userInfo.age"
-                type="number"
-                placeholder="请输入年龄"
-              />
+              <Input id="age" v-model.number="userInfo.age" type="number" placeholder="请输入年龄" />
             </div>
 
             <Button class="w-full" :disabled="loading" @click="updateProfile">
@@ -262,32 +248,18 @@ onMounted(() => {
 
             <div class="space-y-2">
               <Label for="oldPassword">原密码</Label>
-              <Input
-                id="oldPassword"
-                v-model="passwordForm.oldPassword"
-                type="password"
-                placeholder="请输入原密码"
-              />
+              <Input id="oldPassword" v-model="passwordForm.oldPassword" type="password" placeholder="请输入原密码" />
             </div>
 
             <div class="space-y-2">
               <Label for="newPassword">新密码</Label>
-              <Input
-                id="newPassword"
-                v-model="passwordForm.newPassword"
-                type="password"
-                placeholder="请输入新密码"
-              />
+              <Input id="newPassword" v-model="passwordForm.newPassword" type="password" placeholder="请输入新密码" />
             </div>
 
             <div class="space-y-2">
               <Label for="confirmPassword">确认新密码</Label>
-              <Input
-                id="confirmPassword"
-                v-model="passwordForm.confirmPassword"
-                type="password"
-                placeholder="请再次输入新密码"
-              />
+              <Input id="confirmPassword" v-model="passwordForm.confirmPassword" type="password"
+                placeholder="请再次输入新密码" />
             </div>
 
             <Button class="w-full" :disabled="loading" @click="changePassword">

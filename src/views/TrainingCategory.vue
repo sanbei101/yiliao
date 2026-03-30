@@ -71,7 +71,7 @@ const trainings = ref([
   },
 ]);
 
-const selectedCategory = ref<number | null>(null);
+const selectedCategory = ref<string | null>(null);
 
 async function loadData() {
   loading.value = true;
@@ -120,8 +120,9 @@ function goToTraining(id: string) {
 }
 
 function selectCategory(id: string) {
-  selectedCategory.value = parseInt(id);
-  loadVideos(parseInt(id));
+  selectedCategory.value = id;
+  const numId = parseInt(id);
+  loadVideos(isNaN(numId) ? undefined : numId);
 }
 
 async function loadVideos(categoryId?: number) {

@@ -20,7 +20,6 @@ import { api } from "@/services/api";
 const route = useRoute();
 const router = useRouter();
 const loading = ref(true);
-const isLoggedIn = ref(!!api.getToken());
 
 const training = ref({
   id: route.params.id,
@@ -82,7 +81,7 @@ function goBack() {
 
 function togglePlay() {
   training.value.isPlaying = !training.value.isPlaying;
-  
+
   if (training.value.isPlaying) {
     // 开始训练，记录开始时间
     startTime.value = new Date();
@@ -98,7 +97,7 @@ function startTimer() {
   if (timerInterval) {
     clearInterval(timerInterval);
   }
-  
+
   timerInterval = window.setInterval(() => {
     if (startTime.value) {
       const now = new Date();
@@ -121,25 +120,25 @@ async function completeTraining() {
     router.push("/login");
     return;
   }
-  
+
   // 停止计时器
   stopTimer();
-  
+
   // 设置结束时间
   endTime.value = new Date();
-  
+
   // 计算实际训练时长（秒）
   let actualDurationSeconds = elapsedTime.value;
-  
+
   if (startTime.value && endTime.value) {
     actualDurationSeconds = Math.floor((endTime.value.getTime() - startTime.value.getTime()) / 1000);
   }
-  
+
   // 确保至少有1秒的训练时长
-  if (actualDurationSeconds< 1) {
+  if (actualDurationSeconds < 1) {
     actualDurationSeconds = 1;
   }
-  
+
   try {
     const response = await api.createTrainingRecord({
       video_id: parseInt(route.params.id as string),
@@ -149,7 +148,7 @@ async function completeTraining() {
       completed: true,
       source: "free_training"
     });
-    
+
     if (response.success) {
       router.push("/today-plan");
     } else {
@@ -179,9 +178,7 @@ async function completeTraining() {
             <div class="relative aspect-video bg-muted">
               <div class="absolute inset-0 flex items-center justify-center">
                 <div class="text-center">
-                  <div
-                    class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10"
-                  >
+                  <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
                     <Play v-if="!training.isPlaying" class="h-8 w-8 text-primary" />
                     <Pause v-else class="h-8 w-8 text-primary" />
                   </div>
@@ -243,17 +240,12 @@ async function completeTraining() {
             <CardTitle>训练步骤</CardTitle>
           </CardHeader>
           <CardContent class="grid gap-3">
-            <div
-              v-for="(step, index) in training.steps"
-              :key="index"
+            <div v-for="(step, index) in training.steps" :key="index"
               class="flex items-center justify-between rounded-lg border p-3"
-              :class="step.completed ? 'border-primary/20 bg-primary/5' : ''"
-            >
+              :class="step.completed ? 'border-primary/20 bg-primary/5' : ''">
               <div class="flex items-center gap-3">
-                <div
-                  class="flex h-6 w-6 items-center justify-center rounded-full text-xs"
-                  :class="step.completed ? 'bg-primary text-primary-foreground' : 'bg-muted'"
-                >
+                <div class="flex h-6 w-6 items-center justify-center rounded-full text-xs"
+                  :class="step.completed ? 'bg-primary text-primary-foreground' : 'bg-muted'">
                   <CheckCircle v-if="step.completed" class="h-4 w-4" />
                   <span v-else>{{ index + 1 }}</span>
                 </div>
@@ -275,11 +267,8 @@ async function completeTraining() {
           </CardHeader>
           <CardContent>
             <ul class="grid gap-2">
-              <li
-                v-for="(precaution, index) in training.precautions"
-                :key="index"
-                class="flex items-start gap-2 text-sm"
-              >
+              <li v-for="(precaution, index) in training.precautions" :key="index"
+                class="flex items-start gap-2 text-sm">
                 <Info class="mt-0.5 h-4 w-4 text-muted-foreground" />
                 <span>{{ precaution }}</span>
               </li>
