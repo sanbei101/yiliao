@@ -194,7 +194,7 @@ async function loadTrainingRecords() {
     if (timeRange.value === "today") {
       days = 1;
     } else {
-      days = parseInt(timeRange.value);
+      days = Number.parseInt(timeRange.value);
     }
 
     const response = await api.getTrainingRecords(days);
@@ -257,7 +257,7 @@ function calculateStats(groupedRecords: DayRecord[]) {
   const todayStr = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`;
 
   let todayActualMinutes = 0;
-  let todayTrainingDetails: { title: string; duration: number; targetDuration: number }[] = [];
+  const todayTrainingDetails: { title: string; duration: number; targetDuration: number }[] = [];
 
   groupedRecords.forEach((day: DayRecord) => {
     day.trainings.forEach((training: TrainingRecordItem) => {
@@ -327,7 +327,7 @@ function calculateCurrentStreak(groupedRecords: DayRecord[]) {
   });
 
   let streak = 0;
-  let currentDate = new Date();
+  const currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0);
 
   // 检查今天是否有记录
@@ -383,7 +383,7 @@ function getTotalMinutes(day: (typeof records.value)[0]): number {
       </div>
       <div class="flex items-center gap-2">
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+          <DropdownMenuTrigger as-child>
             <Button variant="outline" class="w-45">
               {{ timeRangeOptions.find((opt) => opt.value === timeRange)?.label || "选择时间范围" }}
             </Button>

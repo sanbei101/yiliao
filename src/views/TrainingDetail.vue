@@ -54,7 +54,7 @@ let timerInterval: number | null = null;
 async function loadTrainingDetail() {
   loading.value = true;
   try {
-    const response = await api.getVideoDetail(parseInt(route.params.id as string));
+    const response = await api.getVideoDetail(Number.parseInt(route.params.id as string));
     if (response.success && response.data) {
       const data = response.data;
       training.value = {
@@ -143,7 +143,7 @@ async function completeTraining() {
 
   try {
     const response = await api.createTrainingRecord({
-      video_id: parseInt(route.params.id as string),
+      video_id: Number.parseInt(route.params.id as string),
       start_time: startTime.value ? startTime.value.toISOString() : new Date().toISOString(),
       end_time: endTime.value ? endTime.value.toISOString() : new Date().toISOString(),
       actual_duration_seconds: actualDurationSeconds,

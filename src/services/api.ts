@@ -1,31 +1,31 @@
 const API_BASE_URL = "http://localhost:3001/api";
 
-export interface ApiResponse<T> {
+export type ApiResponse<T> = {
   success: boolean;
   data?: T;
   error?: string;
 }
 
-export interface User {
+export type User = {
   id: number;
   account: string;
   user_name: string;
   role: string;
 }
 
-export interface LoginResponse {
+export type LoginResponse = {
   token: string;
   user: User;
 }
 
-export interface TrainingCategory {
+export type TrainingCategory = {
   id: number;
   name: string;
   parent_id: number | null;
   count: number;
 }
 
-export interface TrainingVideo {
+export type TrainingVideo = {
   id: number;
   title: string;
   cover_url: string;
@@ -36,7 +36,7 @@ export interface TrainingVideo {
   categories?: { id: number; name: string }[];
 }
 
-export interface TodayPlanItem {
+export type TodayPlanItem = {
   id: string;
   title: string;
   duration: string;
@@ -45,7 +45,7 @@ export interface TodayPlanItem {
   current: boolean;
 }
 
-export interface TodayPlan {
+export type TodayPlan = {
   date: string;
   totalDuration: string;
   completedCount: number;
@@ -54,7 +54,7 @@ export interface TodayPlan {
   trainingList: TodayPlanItem[];
 }
 
-export interface TrainingRecord {
+export type TrainingRecord = {
   id: number;
   title: string;
   date: string;
@@ -65,7 +65,7 @@ export interface TrainingRecord {
   category?: string;
 }
 
-export interface TrainingRecordStats {
+export type TrainingRecordStats = {
   todayTotalMinutes: number;
   todayCompletionRate: number;
   todayDurationPercentage: Array<{
@@ -76,7 +76,7 @@ export interface TrainingRecordStats {
   targetMinutesPerDay: number;
 }
 
-export interface TrainingRecordResponse {
+export type TrainingRecordResponse = {
   records: Array<{
     date: string;
     dayOfWeek: string;
@@ -85,7 +85,7 @@ export interface TrainingRecordResponse {
   stats: TrainingRecordStats;
 }
 
-export interface UserProfile {
+export type UserProfile = {
   id: number;
   account: string;
   user_name: string;

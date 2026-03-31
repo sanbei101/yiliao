@@ -121,7 +121,7 @@ function goToTraining(id: string) {
 
 function selectCategory(id: string) {
   selectedCategory.value = id;
-  const numId = parseInt(id);
+  const numId = Number.parseInt(id);
   loadVideos(isNaN(numId) ? undefined : numId);
 }
 
