@@ -248,10 +248,6 @@ async function loadTrainingRecords() {
 }
 
 function calculateStats(groupedRecords: DayRecord[]) {
-  let totalMinutes = 0;
-  let totalTrainings = 0;
-  let completedTrainings = 0;
-
   // 获取今天的日期字符串（格式：YYYY年M月D日）
   const today = new Date();
   const todayStr = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`;
@@ -261,16 +257,6 @@ function calculateStats(groupedRecords: DayRecord[]) {
 
   groupedRecords.forEach((day: DayRecord) => {
     day.trainings.forEach((training: TrainingRecordItem) => {
-      totalTrainings++;
-      if (training.completed) {
-        completedTrainings++;
-      }
-
-      // 累计总时长
-      if (training.actualDuration) {
-        totalMinutes += training.actualDuration;
-      }
-
       // 计算今日进度
       if (day.date === todayStr && training.actualDuration) {
         todayActualMinutes += training.actualDuration;

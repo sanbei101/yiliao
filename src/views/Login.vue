@@ -50,6 +50,7 @@ async function handleSubmit() {
       }
     }
   } catch (err) {
+    console.error(err);
     error.value = "网络错误，请稍后重试";
   } finally {
     loading.value = false;

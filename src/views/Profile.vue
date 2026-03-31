@@ -56,6 +56,7 @@ async function loadUserInfo() {
       error.value = response.error || "加载用户信息失败";
     }
   } catch (err) {
+    console.error(err);
     error.value = "加载用户信息失败";
   } finally {
     loading.value = false;
@@ -80,6 +81,7 @@ async function updateProfile() {
       error.value = response.error || "更新失败";
     }
   } catch (err) {
+    console.error(err);
     error.value = "更新失败";
   } finally {
     loading.value = false;
@@ -110,6 +112,7 @@ async function changePassword() {
       error.value = response.error || "密码修改失败";
     }
   } catch (err) {
+    console.error(err);
     error.value = "密码修改失败";
   } finally {
     loading.value = false;
