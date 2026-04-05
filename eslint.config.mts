@@ -12,6 +12,16 @@ export default antfu({
     "ts/consistent-type-definitions": ["error", "type"],
     "object-shorthand": "off",
     "vue/html-self-closing": "off",
+    "ts/no-unused-vars": [
+      "warn",
+      {
+        vars: "all",
+        args: "all",
+        ignoreRestSiblings: false,
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_",
+      },
+    ],
   },
   ignores: ["src/components/ui"],
 });
