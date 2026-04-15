@@ -1,6 +1,17 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { Plus, Search, Trash2, Edit2, Eye, EyeOff, Users, Film, Folder, Link2 } from "lucide-vue-next";
+import {
+  Plus,
+  Search,
+  Trash2,
+  Edit2,
+  Eye,
+  EyeOff,
+  Users,
+  Film,
+  Folder,
+  Link2,
+} from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,29 +19,57 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { api } from "@/services/api";
 
-const activeTab = ref<'video' | 'category' | 'user' | 'binding'>('video');
+const activeTab = ref<"video" | "category" | "user" | "binding">("video");
 
 // 视频管理
 const videos = ref<any[]>([]);
 const videoDialog = ref(false);
 const editingVideo = ref<any>(null);
-const videoForm = ref({ title: '', video_url: '', cover_url: '', description: '', duration_seconds: 0, caution_text: '', category_ids: [] as number[], status: 1 });
+const videoForm = ref({
+  title: "",
+  video_url: "",
+  cover_url: "",
+  description: "",
+  duration_seconds: 0,
+  caution_text: "",
+  category_ids: [] as number[],
+  status: 1,
+});
 const categories = ref<any[]>([]);
-const searchKeyword = ref('');
+const searchKeyword = ref("");
 
 // 分类管理
 const categoryDialog = ref(false);
-const categoryForm = ref({ name: '', parent_id: undefined as number | undefined, sort_no: 0, status: 1 });
+const categoryForm = ref({
+  name: "",
+  parent_id: undefined as number | undefined,
+  sort_no: 0,
+  status: 1,
+});
 
 // 用户管理
 const users = ref<any[]>([]);
 const userDialog = ref(false);
-const userForm = ref({ account: '', password: '', user_name: '', role: 'elder', gender: '', phone: '', age: undefined as number | undefined, status: 1 });
+const userForm = ref({
+  account: "",
+  password: "",
+  user_name: "",
+  role: "elder",
+  gender: "",
+  phone: "",
+  age: undefined as number | undefined,
+  status: 1,
+});
 
 // 绑定管理
 const bindings = ref<any[]>([]);
 const bindingDialog = ref(false);
-const bindingForm = ref({ elder_id: undefined as number | undefined, child_id: undefined as number | undefined, relation_type: 'daughter', is_primary: 1 });
+const bindingForm = ref({
+  elder_id: undefined as number | undefined,
+  child_id: undefined as number | undefined,
+  relation_type: "daughter",
+  is_primary: 1,
+});
 const elders = ref<any[]>([]);
 const children = ref<any[]>([]);
 
@@ -56,8 +95,8 @@ async function loadBindings() {
 
 async function loadEldersAndChildren() {
   const [elderRes, childRes] = await Promise.all([
-    api.getAdminUsers({ role: 'elder' }),
-    api.getAdminUsers({ role: 'child' })
+    api.getAdminUsers({ role: "elder" }),
+    api.getAdminUsers({ role: "child" }),
   ]);
   if (elderRes.success) elders.value = elderRes.data || [];
   if (childRes.success) children.value = childRes.data || [];
@@ -67,10 +106,28 @@ async function openVideoDialog(video?: any) {
   await loadCategories();
   if (video) {
     editingVideo.value = video;
-    videoForm.value = { title: video.title, video_url: video.video_url, cover_url: video.cover_url || '', description: video.description || '', duration_seconds: video.duration_seconds || 0, caution_text: video.caution_text || '', category_ids: video.categories?.map((c: any) => c.id) || [], status: video.status };
+    videoForm.value = {
+      title: video.title,
+      video_url: video.video_url,
+      cover_url: video.cover_url || "",
+      description: video.description || "",
+      duration_seconds: video.duration_seconds || 0,
+      caution_text: video.caution_text || "",
+      category_ids: video.categories?.map((c: any) => c.id) || [],
+      status: video.status,
+    };
   } else {
     editingVideo.value = null;
-    videoForm.value = { title: '', video_url: '', cover_url: '', description: '', duration_seconds: 0, caution_text: '', category_ids: [], status: 1 };
+    videoForm.value = {
+      title: "",
+      video_url: "",
+      cover_url: "",
+      description: "",
+      duration_seconds: 0,
+      caution_text: "",
+      category_ids: [],
+      status: 1,
+    };
   }
   videoDialog.value = true;
 }
@@ -109,16 +166,23 @@ async function toggleUserStatus(user: any) {
 
 async function saveBinding() {
   if (!bindingForm.value.elder_id || !bindingForm.value.child_id) {
-    alert('请选择老人和子女');
+    alert("请选择老人和子女");
     return;
   }
-  await api.createAdminBinding(bindingForm.value as { elder_id: number; child_id: number; relation_type: string; is_primary?: number });
+  await api.createAdminBinding(
+    bindingForm.value as {
+      elder_id: number;
+      child_id: number;
+      relation_type: string;
+      is_primary?: number;
+    },
+  );
   bindingDialog.value = false;
   loadBindings();
 }
 
 async function deleteBinding(id: number) {
-  if (confirm('确定删除此绑定关系？')) {
+  if (confirm("确定删除此绑定关系？")) {
     await api.deleteAdminBinding(id);
     loadBindings();
   }
@@ -141,40 +205,70 @@ onMounted(() => {
 
     <!-- Tab 导航 -->
     <div class="mb-6 flex gap-2 border-b">
-      <button @click="activeTab = 'video'"
-        :class="['px-4 py-2 border-b-2 -mb-px transition-colors', activeTab === 'video' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground']">
-        <Film class="inline mr-2 h-4 w-4" />视频管理
+      <button
+        @click="activeTab = 'video'"
+        :class="[
+          '-mb-px border-b-2 px-4 py-2 transition-colors',
+          activeTab === 'video'
+            ? 'border-primary text-primary'
+            : 'border-transparent text-muted-foreground hover:text-foreground',
+        ]"
+      >
+        <Film class="mr-2 inline h-4 w-4" />视频管理
       </button>
-      <button @click="activeTab = 'category'"
-        :class="['px-4 py-2 border-b-2 -mb-px transition-colors', activeTab === 'category' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground']">
-        <Folder class="inline mr-2 h-4 w-4" />分类管理
+      <button
+        @click="activeTab = 'category'"
+        :class="[
+          '-mb-px border-b-2 px-4 py-2 transition-colors',
+          activeTab === 'category'
+            ? 'border-primary text-primary'
+            : 'border-transparent text-muted-foreground hover:text-foreground',
+        ]"
+      >
+        <Folder class="mr-2 inline h-4 w-4" />分类管理
       </button>
-      <button @click="activeTab = 'user'"
-        :class="['px-4 py-2 border-b-2 -mb-px transition-colors', activeTab === 'user' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground']">
-        <Users class="inline mr-2 h-4 w-4" />用户管理
+      <button
+        @click="activeTab = 'user'"
+        :class="[
+          '-mb-px border-b-2 px-4 py-2 transition-colors',
+          activeTab === 'user'
+            ? 'border-primary text-primary'
+            : 'border-transparent text-muted-foreground hover:text-foreground',
+        ]"
+      >
+        <Users class="mr-2 inline h-4 w-4" />用户管理
       </button>
-      <button @click="activeTab = 'binding'"
-        :class="['px-4 py-2 border-b-2 -mb-px transition-colors', activeTab === 'binding' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground']">
-        <Link2 class="inline mr-2 h-4 w-4" />绑定管理
+      <button
+        @click="activeTab = 'binding'"
+        :class="[
+          '-mb-px border-b-2 px-4 py-2 transition-colors',
+          activeTab === 'binding'
+            ? 'border-primary text-primary'
+            : 'border-transparent text-muted-foreground hover:text-foreground',
+        ]"
+      >
+        <Link2 class="mr-2 inline h-4 w-4" />绑定管理
       </button>
     </div>
 
     <!-- 视频管理 -->
     <div v-if="activeTab === 'video'">
       <div class="mb-4 flex gap-2">
-        <Input v-model="searchKeyword" placeholder="搜索视频标题..." class="max-w-xs" @keyup.enter="loadVideos" />
-        <Button @click="loadVideos">
-          <Search class="h-4 w-4 mr-1" />搜索
-        </Button>
-        <Button @click="openVideoDialog()">
-          <Plus class="h-4 w-4 mr-1" />新增视频
-        </Button>
+        <Input
+          v-model="searchKeyword"
+          placeholder="搜索视频标题..."
+          class="max-w-xs"
+          @keyup.enter="loadVideos"
+        />
+        <Button @click="loadVideos"> <Search class="mr-1 h-4 w-4" />搜索 </Button>
+        <Button @click="openVideoDialog()"> <Plus class="mr-1 h-4 w-4" />新增视频 </Button>
       </div>
       <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card v-for="video in videos" :key="video.id">
           <CardHeader class="pb-2">
             <div class="flex items-center justify-between">
-              <Badge :variant="video.status === 1 ? 'default' : 'secondary'">{{ video.status === 1 ? '已上架' : '已下架' }}
+              <Badge :variant="video.status === 1 ? 'default' : 'secondary'"
+                >{{ video.status === 1 ? "已上架" : "已下架" }}
               </Badge>
               <div class="flex gap-1">
                 <Button variant="ghost" size="icon" @click="toggleVideoStatus(video)">
@@ -189,13 +283,25 @@ onMounted(() => {
             <CardTitle class="mt-2 text-lg">{{ video.title }}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div class="aspect-video bg-muted rounded-md mb-2 overflow-hidden">
-              <img v-if="video.cover_url" :src="video.cover_url" class="w-full h-full object-cover" />
-              <div v-else class="w-full h-full flex items-center justify-center text-muted-foreground text-sm">无封面</div>
+            <div class="mb-2 aspect-video overflow-hidden rounded-md bg-muted">
+              <img
+                v-if="video.cover_url"
+                :src="video.cover_url"
+                class="h-full w-full object-cover"
+              />
+              <div
+                v-else
+                class="flex h-full w-full items-center justify-center text-sm text-muted-foreground"
+              >
+                无封面
+              </div>
             </div>
-            <p class="text-sm text-muted-foreground line-clamp-2">{{ video.description || '暂无描述' }}</p>
-            <div class="mt-2 flex gap-1 flex-wrap">
-              <Badge v-for="cat in video.categories" :key="cat.id" variant="outline" class="text-xs">{{ cat.name }}
+            <p class="line-clamp-2 text-sm text-muted-foreground">
+              {{ video.description || "暂无描述" }}
+            </p>
+            <div class="mt-2 flex flex-wrap gap-1">
+              <Badge v-for="cat in video.categories" :key="cat.id" variant="outline" class="text-xs"
+                >{{ cat.name }}
               </Badge>
             </div>
           </CardContent>
@@ -206,18 +312,28 @@ onMounted(() => {
     <!-- 分类管理 -->
     <div v-if="activeTab === 'category'">
       <div class="mb-4">
-        <Button @click="categoryDialog = true; categoryForm = { name: '', parent_id: undefined, sort_no: 0, status: 1 }">
-          <Plus class="h-4 w-4 mr-1" />新增分类
+        <Button
+          @click="
+            categoryDialog = true;
+            categoryForm = { name: '', parent_id: undefined, sort_no: 0, status: 1 };
+          "
+        >
+          <Plus class="mr-1 h-4 w-4" />新增分类
         </Button>
       </div>
       <Card>
         <CardContent class="p-0">
           <div class="divide-y">
-            <div v-for="cat in categories" :key="cat.id" class="flex items-center justify-between p-4">
+            <div
+              v-for="cat in categories"
+              :key="cat.id"
+              class="flex items-center justify-between p-4"
+            >
               <div>
                 <span class="font-medium">{{ cat.name }}</span>
-                <Badge :variant="cat.status === 1 ? 'default' : 'secondary'" class="ml-2">{{ cat.status === 1 ? '启用' :
-                  '禁用' }}</Badge>
+                <Badge :variant="cat.status === 1 ? 'default' : 'secondary'" class="ml-2">{{
+                  cat.status === 1 ? "启用" : "禁用"
+                }}</Badge>
               </div>
               <span class="text-sm text-muted-foreground">排序: {{ cat.sort_no }}</span>
             </div>
@@ -230,8 +346,21 @@ onMounted(() => {
     <div v-if="activeTab === 'user'">
       <div class="mb-4">
         <Button
-          @click="userDialog = true; userForm = { account: '', password: '', user_name: '', role: 'elder', gender: '', phone: '', age: undefined, status: 1 }">
-          <Plus class="h-4 w-4 mr-1" />新增用户
+          @click="
+            userDialog = true;
+            userForm = {
+              account: '',
+              password: '',
+              user_name: '',
+              role: 'elder',
+              gender: '',
+              phone: '',
+              age: undefined,
+              status: 1,
+            };
+          "
+        >
+          <Plus class="mr-1 h-4 w-4" />新增用户
         </Button>
       </div>
       <Card>
@@ -240,16 +369,20 @@ onMounted(() => {
             <div v-for="user in users" :key="user.id" class="flex items-center justify-between p-4">
               <div class="flex items-center gap-3">
                 <div
-                  class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
-                  {{ user.user_name?.[0] || user.account?.[0] || '?' }}</div>
+                  class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 font-medium text-primary"
+                >
+                  {{ user.user_name?.[0] || user.account?.[0] || "?" }}
+                </div>
                 <div>
                   <div class="font-medium">{{ user.user_name || user.account }}</div>
-                  <div class="text-sm text-muted-foreground">{{ user.account }} · {{ user.role }} · {{ user.age || '-'
-                    }}岁</div>
+                  <div class="text-sm text-muted-foreground">
+                    {{ user.account }} · {{ user.role }} · {{ user.age || "-" }}岁
+                  </div>
                 </div>
               </div>
               <div class="flex items-center gap-2">
-                <Badge :variant="user.status === 1 ? 'default' : 'secondary'">{{ user.status === 1 ? '正常' : '禁用' }}
+                <Badge :variant="user.status === 1 ? 'default' : 'secondary'"
+                  >{{ user.status === 1 ? "正常" : "禁用" }}
                 </Badge>
                 <Button variant="ghost" size="icon" @click="toggleUserStatus(user)">
                   <EyeOff v-if="user.status === 1" class="h-4 w-4" />
@@ -266,8 +399,17 @@ onMounted(() => {
     <div v-if="activeTab === 'binding'">
       <div class="mb-4">
         <Button
-          @click="bindingDialog = true; bindingForm = { elder_id: undefined, child_id: undefined, relation_type: 'daughter', is_primary: 1 }">
-          <Plus class="h-4 w-4 mr-1" />新增绑定
+          @click="
+            bindingDialog = true;
+            bindingForm = {
+              elder_id: undefined,
+              child_id: undefined,
+              relation_type: 'daughter',
+              is_primary: 1,
+            };
+          "
+        >
+          <Plus class="mr-1 h-4 w-4" />新增绑定
         </Button>
       </div>
       <Card>
@@ -291,11 +433,14 @@ onMounted(() => {
     </div>
 
     <!-- 视频弹窗 -->
-    <div v-if="videoDialog" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-      @click.self="videoDialog = false">
-      <Card class="w-full max-w-lg max-h-[90vh] overflow-y-auto">
+    <div
+      v-if="videoDialog"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      @click.self="videoDialog = false"
+    >
+      <Card class="max-h-[90vh] w-full max-w-lg overflow-y-auto">
         <CardHeader>
-          <CardTitle>{{ editingVideo ? '编辑视频' : '新增视频' }}</CardTitle>
+          <CardTitle>{{ editingVideo ? "编辑视频" : "新增视频" }}</CardTitle>
         </CardHeader>
         <CardContent class="grid gap-4">
           <div class="grid gap-2">
@@ -312,7 +457,12 @@ onMounted(() => {
           </div>
           <div class="grid gap-2">
             <Label>描述</Label>
-            <Input v-model="videoForm.description" placeholder="视频描述" />
+            <textarea
+              v-model="videoForm.description"
+              placeholder="请输入视频详细描述..."
+              rows="3"
+              class="min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            ></textarea>
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div class="grid gap-2">
@@ -327,13 +477,24 @@ onMounted(() => {
           <div class="grid gap-2">
             <Label>分类</Label>
             <div class="flex flex-wrap gap-2">
-              <Badge v-for="cat in categories" :key="cat.id"
-                :variant="videoForm.category_ids.includes(cat.id) ? 'default' : 'outline'" class="cursor-pointer"
-                @click="videoForm.category_ids.includes(cat.id) ? videoForm.category_ids = videoForm.category_ids.filter(id => id !== cat.id) : videoForm.category_ids.push(cat.id)">
-                {{ cat.name }}</Badge>
+              <Badge
+                v-for="cat in categories"
+                :key="cat.id"
+                :variant="videoForm.category_ids.includes(cat.id) ? 'default' : 'outline'"
+                class="cursor-pointer"
+                @click="
+                  videoForm.category_ids.includes(cat.id)
+                    ? (videoForm.category_ids = videoForm.category_ids.filter(
+                        (id) => id !== cat.id,
+                      ))
+                    : videoForm.category_ids.push(cat.id)
+                "
+              >
+                {{ cat.name }}</Badge
+              >
             </div>
           </div>
-          <div class="flex justify-end gap-2 mt-4">
+          <div class="mt-4 flex justify-end gap-2">
             <Button variant="outline" @click="videoDialog = false">取消</Button>
             <Button @click="saveVideo">保存</Button>
           </div>
@@ -342,8 +503,11 @@ onMounted(() => {
     </div>
 
     <!-- 分类弹窗 -->
-    <div v-if="categoryDialog" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-      @click.self="categoryDialog = false">
+    <div
+      v-if="categoryDialog"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      @click.self="categoryDialog = false"
+    >
       <Card class="w-full max-w-md">
         <CardHeader>
           <CardTitle>新增分类</CardTitle>
@@ -360,14 +524,16 @@ onMounted(() => {
             </div>
             <div class="grid gap-2">
               <Label>状态</Label>
-              <select v-model="categoryForm.status"
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+              <select
+                v-model="categoryForm.status"
+                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
                 <option :value="1">启用</option>
                 <option :value="0">禁用</option>
               </select>
             </div>
           </div>
-          <div class="flex justify-end gap-2 mt-4">
+          <div class="mt-4 flex justify-end gap-2">
             <Button variant="outline" @click="categoryDialog = false">取消</Button>
             <Button @click="saveCategory">保存</Button>
           </div>
@@ -376,8 +542,11 @@ onMounted(() => {
     </div>
 
     <!-- 用户弹窗 -->
-    <div v-if="userDialog" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-      @click.self="userDialog = false">
+    <div
+      v-if="userDialog"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      @click.self="userDialog = false"
+    >
       <Card class="w-full max-w-md">
         <CardHeader>
           <CardTitle>新增用户</CardTitle>
@@ -398,8 +567,10 @@ onMounted(() => {
           <div class="grid grid-cols-2 gap-4">
             <div class="grid gap-2">
               <Label>角色</Label>
-              <select v-model="userForm.role"
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+              <select
+                v-model="userForm.role"
+                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
                 <option value="elder">老人</option>
                 <option value="child">子女</option>
                 <option value="admin">管理员</option>
@@ -407,8 +578,10 @@ onMounted(() => {
             </div>
             <div class="grid gap-2">
               <Label>性别</Label>
-              <select v-model="userForm.gender"
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+              <select
+                v-model="userForm.gender"
+                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
                 <option value="">未设置</option>
                 <option value="男">男</option>
                 <option value="女">女</option>
@@ -425,7 +598,7 @@ onMounted(() => {
               <Input v-model.number="userForm.age" type="number" placeholder="年龄" />
             </div>
           </div>
-          <div class="flex justify-end gap-2 mt-4">
+          <div class="mt-4 flex justify-end gap-2">
             <Button variant="outline" @click="userDialog = false">取消</Button>
             <Button @click="saveUser">保存</Button>
           </div>
@@ -434,8 +607,11 @@ onMounted(() => {
     </div>
 
     <!-- 绑定弹窗 -->
-    <div v-if="bindingDialog" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-      @click.self="bindingDialog = false">
+    <div
+      v-if="bindingDialog"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      @click.self="bindingDialog = false"
+    >
       <Card class="w-full max-w-md">
         <CardHeader>
           <CardTitle>新增绑定</CardTitle>
@@ -443,25 +619,35 @@ onMounted(() => {
         <CardContent class="grid gap-4">
           <div class="grid gap-2">
             <Label>老人</Label>
-            <select v-model="bindingForm.elder_id"
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+            <select
+              v-model="bindingForm.elder_id"
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            >
               <option :value="null">选择老人</option>
-              <option v-for="e in elders" :key="e.id" :value="e.id">{{ e.user_name || e.account }}</option>
+              <option v-for="e in elders" :key="e.id" :value="e.id">
+                {{ e.user_name || e.account }}
+              </option>
             </select>
           </div>
           <div class="grid gap-2">
             <Label>子女</Label>
-            <select v-model="bindingForm.child_id"
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+            <select
+              v-model="bindingForm.child_id"
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            >
               <option :value="null">选择子女</option>
-              <option v-for="c in children" :key="c.id" :value="c.id">{{ c.user_name || c.account }}</option>
+              <option v-for="c in children" :key="c.id" :value="c.id">
+                {{ c.user_name || c.account }}
+              </option>
             </select>
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div class="grid gap-2">
               <Label>关系</Label>
-              <select v-model="bindingForm.relation_type"
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+              <select
+                v-model="bindingForm.relation_type"
+                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
                 <option value="daughter">女儿</option>
                 <option value="son">儿子</option>
                 <option value="other">其他</option>
@@ -469,14 +655,16 @@ onMounted(() => {
             </div>
             <div class="grid gap-2">
               <Label>是否主要</Label>
-              <select v-model="bindingForm.is_primary"
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+              <select
+                v-model="bindingForm.is_primary"
+                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
                 <option :value="1">是</option>
                 <option :value="0">否</option>
               </select>
             </div>
           </div>
-          <div class="flex justify-end gap-2 mt-4">
+          <div class="mt-4 flex justify-end gap-2">
             <Button variant="outline" @click="bindingDialog = false">取消</Button>
             <Button @click="saveBinding">保存</Button>
           </div>

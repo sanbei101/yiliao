@@ -6,5 +6,5 @@ export default defineConfig({
     functions: ["clsx", "cn"],
     stylesheet: "src/style.css",
   },
-  ignorePatterns: ["src/components/ui"],
+  ignorePatterns: ["src/components/ui", "backend"],
 });

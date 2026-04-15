@@ -1,15 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import {
-  ArrowLeft,
-  CheckCircle,
-  Clock,
-  Info,
-  Pause,
-  Play,
-  AlertTriangle,
-} from "lucide-vue-next";
+import { ArrowLeft, CheckCircle, Clock, Info, Pause, Play, AlertTriangle } from "lucide-vue-next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -122,7 +114,9 @@ async function completeTraining() {
   let actualDurationSeconds = elapsedTime.value;
 
   if (startTime.value && endTime.value) {
-    actualDurationSeconds = Math.floor((endTime.value.getTime() - startTime.value.getTime()) / 1000);
+    actualDurationSeconds = Math.floor(
+      (endTime.value.getTime() - startTime.value.getTime()) / 1000,
+    );
   }
 
   if (actualDurationSeconds < 1) actualDurationSeconds = 1;
@@ -158,15 +152,25 @@ async function completeTraining() {
       <h1 class="text-2xl font-semibold tracking-tight">{{ training.title }}</h1>
     </div>
 
-    <div class="grid gap-6 lg:grid-cols-2">
+    <div class="grid gap-6">
       <section>
         <Card class="mb-6">
           <CardContent class="p-0">
             <div class="aspect-video bg-black">
-              <iframe v-if="bilibiliEmbedUrl" :src="bilibiliEmbedUrl" class="w-full h-full" allowfullscreen scrolling="no" frameborder="0"></iframe>
-              <div v-else class="w-full h-full flex items-center justify-center text-muted-foreground">
+              <iframe
+                v-if="bilibiliEmbedUrl"
+                :src="bilibiliEmbedUrl"
+                class="h-full w-full"
+                allowfullscreen
+                scrolling="no"
+                frameborder="0"
+              ></iframe>
+              <div
+                v-else
+                class="flex h-full w-full items-center justify-center text-muted-foreground"
+              >
                 <div class="text-center">
-                  <Play class="h-16 w-16 mx-auto mb-2 opacity-50" />
+                  <Play class="mx-auto mb-2 h-16 w-16 opacity-50" />
                   <p>暂无视频</p>
                 </div>
               </div>
@@ -214,7 +218,11 @@ async function completeTraining() {
           </CardHeader>
           <CardContent>
             <ul class="grid gap-2">
-              <li v-for="(precaution, index) in training.precautions" :key="index" class="flex items-start gap-2 text-sm">
+              <li
+                v-for="(precaution, index) in training.precautions"
+                :key="index"
+                class="flex items-start gap-2 text-sm"
+              >
                 <Info class="mt-0.5 h-4 w-4 text-muted-foreground" />
                 <span>{{ precaution }}</span>
               </li>
