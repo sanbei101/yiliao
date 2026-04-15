@@ -174,9 +174,13 @@ onMounted(() => {
                   }}</span>
                 </div>
               </div>
-              <Button variant="destructive" class="mt-4 w-full" @click="logout">
+              1 <Button variant="default" class="mt-4 w-full" @click="logout">
                 <LogOut class="mr-2 h-4 w-4" />
                 退出登录
+              </Button>
+              <Button v-if="userInfo.role === 'admin'" variant="outline" class="w-full" @click="router.push('/admin')"
+                :disabled="loading">
+                进入管理后台
               </Button>
             </div>
           </CardContent>
@@ -185,19 +189,13 @@ onMounted(() => {
 
       <div class="lg:col-span-2">
         <div class="mb-4 flex gap-2">
-          <Button
-            variant="outline"
-            :class="{ 'bg-primary text-primary-foreground': activeTab === 'profile' }"
-            @click="activeTab = 'profile'"
-          >
+          <Button variant="outline" :class="{ 'bg-primary text-primary-foreground': activeTab === 'profile' }"
+            @click="activeTab = 'profile'">
             <User class="mr-2 h-4 w-4" />
             个人资料
           </Button>
-          <Button
-            variant="outline"
-            :class="{ 'bg-primary text-primary-foreground': activeTab === 'password' }"
-            @click="activeTab = 'password'"
-          >
+          <Button variant="outline" :class="{ 'bg-primary text-primary-foreground': activeTab === 'password' }"
+            @click="activeTab = 'password'">
             <Key class="mr-2 h-4 w-4" />
             修改密码
           </Button>
@@ -224,18 +222,12 @@ onMounted(() => {
             <div class="space-y-2">
               <Label for="gender">性别</Label>
               <div class="flex gap-2">
-                <Button
-                  variant="outline"
-                  :class="{ 'bg-primary text-primary-foreground': userInfo.gender === '男' }"
-                  @click="userInfo.gender = '男'"
-                >
+                <Button variant="outline" :class="{ 'bg-primary text-primary-foreground': userInfo.gender === '男' }"
+                  @click="userInfo.gender = '男'">
                   男
                 </Button>
-                <Button
-                  variant="outline"
-                  :class="{ 'bg-primary text-primary-foreground': userInfo.gender === '女' }"
-                  @click="userInfo.gender = '女'"
-                >
+                <Button variant="outline" :class="{ 'bg-primary text-primary-foreground': userInfo.gender === '女' }"
+                  @click="userInfo.gender = '女'">
                   女
                 </Button>
               </div>
@@ -248,12 +240,7 @@ onMounted(() => {
 
             <div class="space-y-2">
               <Label for="age">年龄</Label>
-              <Input
-                id="age"
-                v-model.number="userInfo.age"
-                type="number"
-                placeholder="请输入年龄"
-              />
+              <Input id="age" v-model.number="userInfo.age" type="number" placeholder="请输入年龄" />
             </div>
 
             <Button class="w-full" :disabled="loading" @click="updateProfile"> 保存资料 </Button>
@@ -275,32 +262,18 @@ onMounted(() => {
 
             <div class="space-y-2">
               <Label for="oldPassword">原密码</Label>
-              <Input
-                id="oldPassword"
-                v-model="passwordForm.oldPassword"
-                type="password"
-                placeholder="请输入原密码"
-              />
+              <Input id="oldPassword" v-model="passwordForm.oldPassword" type="password" placeholder="请输入原密码" />
             </div>
 
             <div class="space-y-2">
               <Label for="newPassword">新密码</Label>
-              <Input
-                id="newPassword"
-                v-model="passwordForm.newPassword"
-                type="password"
-                placeholder="请输入新密码"
-              />
+              <Input id="newPassword" v-model="passwordForm.newPassword" type="password" placeholder="请输入新密码" />
             </div>
 
             <div class="space-y-2">
               <Label for="confirmPassword">确认新密码</Label>
-              <Input
-                id="confirmPassword"
-                v-model="passwordForm.confirmPassword"
-                type="password"
-                placeholder="请再次输入新密码"
-              />
+              <Input id="confirmPassword" v-model="passwordForm.confirmPassword" type="password"
+                placeholder="请再次输入新密码" />
             </div>
 
             <Button class="w-full" :disabled="loading" @click="changePassword"> 修改密码 </Button>
