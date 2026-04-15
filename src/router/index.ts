@@ -6,6 +6,7 @@ import TodayPlan from "@/views/TodayPlan.vue";
 import TrainingRecord from "@/views/TrainingRecord.vue";
 import Login from "@/views/Login.vue";
 import Profile from "@/views/Profile.vue";
+import Admin from "@/views/Admin.vue";
 import { api } from "@/services/api";
 
 const router = createRouter({
@@ -46,6 +47,12 @@ const router = createRouter({
       path: "/training-record",
       name: "training-record",
       component: TrainingRecord,
+    },
+    {
+      path: "/admin",
+      name: "admin",
+      component: Admin,
+      // meta: { requiresAuth: true },
     },
   ],
 });

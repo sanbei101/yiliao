@@ -1,29 +1,29 @@
-const API_BASE_URL = "http://localhost:3001/api";
+const API_BASE_URL = "http://62.234.163.176:3000/api";
 
 export type ApiResponse<T> = {
   success: boolean;
   data?: T;
   error?: string;
-}
+};
 
 export type User = {
   id: number;
   account: string;
   user_name: string;
   role: string;
-}
+};
 
 export type LoginResponse = {
   token: string;
   user: User;
-}
+};
 
 export type TrainingCategory = {
   id: number;
   name: string;
   parent_id: number | null;
   count: number;
-}
+};
 
 export type TrainingVideo = {
   id: number;
@@ -34,7 +34,7 @@ export type TrainingVideo = {
   duration_seconds: number;
   duration: string;
   categories?: { id: number; name: string }[];
-}
+};
 
 export type TodayPlanItem = {
   id: string;
@@ -43,7 +43,7 @@ export type TodayPlanItem = {
   order: number;
   completed: boolean;
   current: boolean;
-}
+};
 
 export type TodayPlan = {
   date: string;
@@ -52,7 +52,7 @@ export type TodayPlan = {
   totalCount: number;
   progress: number;
   trainingList: TodayPlanItem[];
-}
+};
 
 export type TrainingRecord = {
   id: number;
@@ -63,7 +63,7 @@ export type TrainingRecord = {
   actualDuration?: number;
   targetDuration?: number;
   category?: string;
-}
+};
 
 export type TrainingRecordStats = {
   todayTotalMinutes: number;
@@ -74,7 +74,7 @@ export type TrainingRecordStats = {
     percentage: number;
   }>;
   targetMinutesPerDay: number;
-}
+};
 
 export type TrainingRecordResponse = {
   records: Array<{
@@ -83,7 +83,7 @@ export type TrainingRecordResponse = {
     trainings: TrainingRecord[];
   }>;
   stats: TrainingRecordStats;
-}
+};
 
 export type UserProfile = {
   id: number;
@@ -94,7 +94,7 @@ export type UserProfile = {
   phone?: string;
   age?: number;
   created_at?: string;
-}
+};
 
 class ApiService {
   private token: string | null = null;
@@ -241,6 +241,136 @@ class ApiService {
       method: "PUT",
       body: JSON.stringify(data),
     });
+  }
+
+  // ===== 管理员接口 =====
+  async getAdminVideos(params?: {
+    category_id?: number;
+    status?: number;
+    keyword?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<ApiResponse<any[]>> {
+    const p = new URLSearchParams();
+    if (params?.category_id) p.append("category_id", String(params.category_id));
+    if (params?.status !== undefined) p.append("status", String(params.status));
+    if (params?.keyword) p.append("keyword", params.keyword);
+    if (params?.page) p.append("page", String(params.page));
+    if (params?.limit) p.append("limit", String(params.limit));
+    const q = p.toString();
+    return this.request<any[]>(`/admin/videos${q ? `?${q}` : ""}`);
+  }
+
+  async createAdminVideo(data: {
+    title: string;
+    cover_url?: string;
+    video_url: string;
+    description?: string;
+    duration_seconds?: number;
+    caution_text?: string;
+    status?: number;
+    category_ids: number[];
+  }): Promise<ApiResponse<any>> {
+    return this.request<any>("/admin/videos", { method: "POST", body: JSON.stringify(data) });
+  }
+
+  async updateAdminVideo(
+    id: number,
+    data: {
+      title: string;
+      cover_url?: string;
+      video_url: string;
+      description?: string;
+      duration_seconds?: number;
+      caution_text?: string;
+      category_ids: number[];
+    },
+  ): Promise<ApiResponse<any>> {
+    return this.request<any>(`/admin/videos/${id}`, { method: "PUT", body: JSON.stringify(data) });
+  }
+
+  async updateAdminVideoStatus(id: number, status: number): Promise<ApiResponse<any>> {
+    return this.request<any>(`/admin/videos/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    });
+  }
+
+  async getAdminCategories(params?: {
+    parent_id?: number;
+    status?: number;
+  }): Promise<ApiResponse<any[]>> {
+    const p = new URLSearchParams();
+    if (params?.parent_id !== undefined) p.append("parent_id", String(params.parent_id));
+    if (params?.status !== undefined) p.append("status", String(params.status));
+    const q = p.toString();
+    return this.request<any[]>(`/admin/categories${q ? `?${q}` : ""}`);
+  }
+
+  async createAdminCategory(data: {
+    name: string;
+    parent_id?: number;
+    sort_no?: number;
+    status?: number;
+  }): Promise<ApiResponse<any>> {
+    return this.request<any>("/admin/categories", { method: "POST", body: JSON.stringify(data) });
+  }
+
+  async getAdminUsers(params?: {
+    role?: string;
+    status?: number;
+    account?: string;
+  }): Promise<ApiResponse<any[]>> {
+    const p = new URLSearchParams();
+    if (params?.role) p.append("role", params.role);
+    if (params?.status !== undefined) p.append("status", String(params.status));
+    if (params?.account) p.append("account", params.account);
+    const q = p.toString();
+    return this.request<any[]>(`/admin/users${q ? `?${q}` : ""}`);
+  }
+
+  async createAdminUser(data: {
+    account: string;
+    password: string;
+    user_name: string;
+    role: string;
+    gender?: string;
+    phone?: string;
+    age?: number;
+    status?: number;
+  }): Promise<ApiResponse<any>> {
+    return this.request<any>("/admin/users", { method: "POST", body: JSON.stringify(data) });
+  }
+
+  async updateAdminUserStatus(id: number, status: number): Promise<ApiResponse<any>> {
+    return this.request<any>(`/admin/users/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    });
+  }
+
+  async getAdminBindings(params?: {
+    elder_id?: number;
+    child_id?: number;
+  }): Promise<ApiResponse<any[]>> {
+    const p = new URLSearchParams();
+    if (params?.elder_id) p.append("elder_id", String(params.elder_id));
+    if (params?.child_id) p.append("child_id", String(params.child_id));
+    const q = p.toString();
+    return this.request<any[]>(`/admin/bindings${q ? `?${q}` : ""}`);
+  }
+
+  async createAdminBinding(data: {
+    elder_id: number;
+    child_id: number;
+    relation_type: string;
+    is_primary?: number;
+  }): Promise<ApiResponse<any>> {
+    return this.request<any>("/admin/bindings", { method: "POST", body: JSON.stringify(data) });
+  }
+
+  async deleteAdminBinding(id: number): Promise<ApiResponse<any>> {
+    return this.request<any>(`/admin/bindings/${id}`, { method: "DELETE" });
   }
 }
 

@@ -1,15 +1,13 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import {
   ArrowLeft,
   CheckCircle,
   Clock,
   Info,
-  ListChecks,
   Pause,
   Play,
-  Speaker,
   AlertTriangle,
 } from "lucide-vue-next";
 import { Badge } from "@/components/ui/badge";
@@ -24,25 +22,17 @@ const loading = ref(true);
 const training = ref({
   id: route.params.id,
   title: "肩颈活动训练",
+  video_url: "",
   category: "关节舒缓",
   duration: "10分钟",
   difficulty: "入门",
   description: "通过轻柔的颈部旋转和肩部活动,缓解肩颈僵硬和不适。适合长期伏案工作的人群。",
-  steps: [
-    { name: "颈部左右旋转", duration: "30秒", completed: false },
-    { name: "颈部前后倾斜", duration: "30秒", completed: false },
-    { name: "肩部上下活动", duration: "1分钟", completed: false },
-    { name: "肩部前后旋转", duration: "1分钟", completed: false },
-    { name: "头部侧倾拉伸", duration: "每侧30秒", completed: false },
-    { name: "全身放松", duration: "30秒", completed: false },
-  ],
   precautions: [
     "训练时保持呼吸平稳,不要憋气",
     "动作应轻柔缓慢,不要勉强",
     "如感到疼痛应立即停止",
     "饭后30分钟内不宜训练",
   ],
-  progress: 0,
   isPlaying: false,
 });
 
@@ -50,6 +40,16 @@ const startTime = ref<Date | null>(null);
 const endTime = ref<Date | null>(null);
 const elapsedTime = ref(0);
 let timerInterval: number | null = null;
+
+// B站视频嵌入
+const bilibiliEmbedUrl = computed(() => {
+  if (!training.value.video_url) return "";
+  const match = training.value.video_url.match(/bilibili\.com\/video\/(BV[\w]+)/);
+  if (match) {
+    return `https://player.bilibili.com/player.html?bvid=${match[1]}&autoplay=0`;
+  }
+  return "";
+});
 
 async function loadTrainingDetail() {
   loading.value = true;
@@ -60,6 +60,7 @@ async function loadTrainingDetail() {
       training.value = {
         ...training.value,
         title: data.title,
+        video_url: data.video_url || "",
         duration: data.duration,
         description: data.description || training.value.description,
       };
@@ -83,21 +84,16 @@ function togglePlay() {
   training.value.isPlaying = !training.value.isPlaying;
 
   if (training.value.isPlaying) {
-    // 开始训练，记录开始时间
     startTime.value = new Date();
     startTimer();
   } else {
-    // 暂停训练，记录结束时间
     endTime.value = new Date();
     stopTimer();
   }
 }
 
 function startTimer() {
-  if (timerInterval) {
-    clearInterval(timerInterval);
-  }
-
+  if (timerInterval) clearInterval(timerInterval);
   timerInterval = window.setInterval(() => {
     if (startTime.value) {
       const now = new Date();
@@ -121,25 +117,15 @@ async function completeTraining() {
     return;
   }
 
-  // 停止计时器
   stopTimer();
-
-  // 设置结束时间
   endTime.value = new Date();
-
-  // 计算实际训练时长（秒）
   let actualDurationSeconds = elapsedTime.value;
 
   if (startTime.value && endTime.value) {
-    actualDurationSeconds = Math.floor(
-      (endTime.value.getTime() - startTime.value.getTime()) / 1000,
-    );
+    actualDurationSeconds = Math.floor((endTime.value.getTime() - startTime.value.getTime()) / 1000);
   }
 
-  // 确保至少有1秒的训练时长
-  if (actualDurationSeconds < 1) {
-    actualDurationSeconds = 1;
-  }
+  if (actualDurationSeconds < 1) actualDurationSeconds = 1;
 
   try {
     const response = await api.createTrainingRecord({
@@ -154,7 +140,6 @@ async function completeTraining() {
     if (response.success) {
       router.push("/today-plan");
     } else {
-      console.error("创建训练记录失败:", response.error);
       router.push("/today-plan");
     }
   } catch (error) {
@@ -177,43 +162,27 @@ async function completeTraining() {
       <section>
         <Card class="mb-6">
           <CardContent class="p-0">
-            <div class="relative aspect-video bg-muted">
-              <div class="absolute inset-0 flex items-center justify-center">
+            <div class="aspect-video bg-black">
+              <iframe v-if="bilibiliEmbedUrl" :src="bilibiliEmbedUrl" class="w-full h-full" allowfullscreen scrolling="no" frameborder="0"></iframe>
+              <div v-else class="w-full h-full flex items-center justify-center text-muted-foreground">
                 <div class="text-center">
-                  <div
-                    class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10"
-                  >
-                    <Play v-if="!training.isPlaying" class="h-8 w-8 text-primary" />
-                    <Pause v-else class="h-8 w-8 text-primary" />
-                  </div>
-                  <p class="text-sm text-muted-foreground">点击播放训练视频</p>
+                  <Play class="h-16 w-16 mx-auto mb-2 opacity-50" />
+                  <p>暂无视频</p>
                 </div>
               </div>
             </div>
             <div class="flex items-center justify-between p-4">
+              <div class="flex items-center gap-2">
+                <Clock class="h-4 w-4 text-muted-foreground" />
+                <span class="text-sm font-medium">
+                  {{ Math.floor(elapsedTime / 60) }}:{{ String(elapsedTime % 60).padStart(2, "0") }}
+                </span>
+              </div>
               <Button @click="togglePlay">
                 <Play v-if="!training.isPlaying" class="mr-2 h-4 w-4" />
                 <Pause v-else class="mr-2 h-4 w-4" />
                 {{ training.isPlaying ? "暂停" : "开始训练" }}
               </Button>
-              <div class="flex items-center gap-4">
-                <div class="flex items-center gap-2">
-                  <Clock class="h-4 w-4 text-muted-foreground" />
-                  <span class="text-sm font-medium">
-                    {{ Math.floor(elapsedTime / 60) }}:{{
-                      String(elapsedTime % 60).padStart(2, "0")
-                    }}
-                  </span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <Button variant="outline" size="icon">
-                    <Speaker class="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    <ListChecks class="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
             </div>
           </CardContent>
         </Card>
@@ -232,44 +201,11 @@ async function completeTraining() {
               <Badge variant="secondary">
                 {{ training.category }}
               </Badge>
-              <Badge variant="secondary">
-                {{ training.difficulty }}
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
-
-      <section>
-        <Card class="mb-6">
-          <CardHeader>
-            <CardTitle>训练步骤</CardTitle>
-          </CardHeader>
-          <CardContent class="grid gap-3">
-            <div
-              v-for="(step, index) in training.steps"
-              :key="index"
-              class="flex items-center justify-between rounded-lg border p-3"
-              :class="step.completed ? 'border-primary/20 bg-primary/5' : ''"
-            >
-              <div class="flex items-center gap-3">
-                <div
-                  class="flex h-6 w-6 items-center justify-center rounded-full text-xs"
-                  :class="step.completed ? 'bg-primary text-primary-foreground' : 'bg-muted'"
-                >
-                  <CheckCircle v-if="step.completed" class="h-4 w-4" />
-                  <span v-else>{{ index + 1 }}</span>
-                </div>
-                <span :class="step.completed ? 'text-muted-foreground line-through' : ''">
-                  {{ step.name }}
-                </span>
-              </div>
-              <span class="text-sm text-muted-foreground">{{ step.duration }}</span>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card class="mt-4">
           <CardHeader>
             <CardTitle class="flex items-center gap-2">
               <AlertTriangle class="h-5 w-5 text-amber-500" />
@@ -278,11 +214,7 @@ async function completeTraining() {
           </CardHeader>
           <CardContent>
             <ul class="grid gap-2">
-              <li
-                v-for="(precaution, index) in training.precautions"
-                :key="index"
-                class="flex items-start gap-2 text-sm"
-              >
+              <li v-for="(precaution, index) in training.precautions" :key="index" class="flex items-start gap-2 text-sm">
                 <Info class="mt-0.5 h-4 w-4 text-muted-foreground" />
                 <span>{{ precaution }}</span>
               </li>
